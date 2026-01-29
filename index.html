@@ -7,30 +7,52 @@
     <style>
         body { background: #000; color: #0ff; font-family: 'Courier New', monospace; text-align: center; margin: 0; padding: 20px; }
         h1 { text-shadow: 0 0 10px #0ff; }
-        .container { max-width: 600px; margin: auto; }
-        iframe { width: 100%; height: 70vh; border: 2px solid #0ff; background: #fff; margin-top: 20px; box-shadow: 0 0 15px #0ff; }
-        input { padding: 12px; width: 70%; background: #111; color: #0ff; border: 1px solid #0ff; outline: none; }
-        button { padding: 12px 20px; background: #0ff; color: #000; font-weight: bold; border: none; cursor: pointer; transition: 0.3s; }
+        .container { max-width: 800px; margin: auto; }
+        #viewer { width: 100%; height: 75vh; border: 2px solid #0ff; background: #fff; margin-top: 20px; box-shadow: 0 0 15px #0ff; overflow: auto; }
+        input { padding: 12px; width: 60%; background: #111; color: #0ff; border: 1px solid #0ff; outline: none; }
+        button { padding: 12px 20px; background: #0ff; color: #000; font-weight: bold; border: none; cursor: pointer; }
         button:hover { background: #fff; box-shadow: 0 0 20px #fff; }
+        /* Style tambahan biar tampilan konten Telegram nggak berantakan */
+        .tgme_widget_message { margin-bottom: 10px; border-bottom: 1px solid #ccc; padding: 10px; color: #000; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>ZING-ZANG STEALTH SPY 🕵️‍♂️</h1>
-        <p>Masukkan username channel adek lu tanpa @</p>
+        <p>Masukkan username channel target (tanpa @)</p>
         <input type="text" id="channel" placeholder="Contoh: info_channel_target">
         <button onclick="spy()">HAJAR! 💣</button>
-        <div id="viewer"></div>
+        <div id="viewer">Belum ada data...</div>
     </div>
 
     <script>
         function spy() {
             let channel = document.getElementById('channel').value;
-            if(!channel) { alert('Isi dulu usernamenya, bego!'); return; }
-            let url = "https://t.me/s/" + channel;
-            document.getElementById('viewer').innerHTML = '<iframe src="' + url + '"></iframe>';
+            if(!channel) { alert('Isi usernamenya dulu, bego!'); return; }
+            
+            document.getElementById('viewer').innerHTML = '<h2 style="color:black">Lagi nembus pertahanan... ⏳</h2>';
+            
+            // Kita rampok isinya pake proxy biar nggak kena blokir X-Frame
+            let targetUrl = "https://t.me/s/" + channel;
+            let proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(targetUrl);
+
+            fetch(proxyUrl)
+                .then(response => {
+                    if (response.ok) return response.json();
+                    throw new Error('Gagal ngerampok data!');
+                })
+                .then(data => {
+                    // Kita bersihin link-linknya biar tetep nempel ke Telegram
+                    let cleanContent = data.contents.replace(/href="\//g, 'href="https://t.me/');
+                    document.getElementById('viewer').innerHTML = `
+                        <div style="background:white; color:black; text-align:left; padding:20px;">
+                            ${cleanContent}
+                        </div>`;
+                })
+                .catch(err => {
+                    document.getElementById('viewer').innerHTML = '<h2 style="color:red">Gagal total! Pastiin channelnya publik! 🖕</h2>';
+                });
         }
     </script>
 </body>
-  </html>
-  
+</html>
